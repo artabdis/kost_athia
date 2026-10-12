@@ -43,6 +43,12 @@
       <p class="text-gray-400 text-sm">Login untuk melanjutkan</p>
     </div>
 
+    @if(session('success'))
+      <div class="mb-4 p-3 bg-green-500/20 text-green-400 rounded-lg text-sm">
+        {{ session('success') }}
+      </div>
+    @endif
+
     <!-- ERROR MESSAGE -->
     @if(session('error'))
       <div class="mb-4 p-3 bg-red-500/20 text-red-400 rounded-lg text-sm">

@@ -45,7 +45,7 @@
 
     <!-- Logo -->
     <div class="text-center mb-6">
-      <h1 class="text-2xl font-semibold text-[#E5E7EB]"> Digital Library</h1>
+      <h1 class="text-2xl font-semibold text-[#E5E7EB]"> Kost Athia</h1>
     </div>
 
     <!-- Title -->
