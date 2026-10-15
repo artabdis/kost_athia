@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -49,20 +50,46 @@ class AuthController extends Controller
             ],
         ]);
 
-        User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
+        DB::transaction(function () use ($validated): void {
+            $role = User::query()->doesntExist() ? 'admin' : 'user';
+
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+            ]);
+
+            $user->forceFill(['role' => $role])->save();
+        });
 
         return redirect()
             ->route('login')
             ->with('success', 'Akun berhasil dibuat. Silakan login.');
     }
 
-    public function dashboard(): View
+    public function dashboard(): View|RedirectResponse
     {
-        return view('dashboard');
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            return view('dashboard', [
+                'payments' => User::query()
+                    ->where('role', 'user')
+                    ->where('payment_status', 'submitted')
+                    ->latest()
+                    ->get(),
+            ]);
+        }
+
+        abort_unless($user->role === 'user', 403);
+
+        if ($user->payment_status !== 'approved') {
+            return redirect()
+                ->route('payment.show')
+                ->with('info', 'Dashboard dapat diakses setelah admin memverifikasi pembayaran Anda.');
+        }
+
+        return view('dashboard', ['buku' => collect()]);
     }
 
     public function logout(Request $request): RedirectResponse

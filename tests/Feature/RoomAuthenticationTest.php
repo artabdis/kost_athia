@@ -13,7 +13,9 @@ class RoomAuthenticationTest extends TestCase
     public function test_guest_can_view_room_listing_and_details_without_logging_in(): void
     {
         $this->get('/kamar')->assertOk();
-        $this->get('/kamar/vip')->assertOk();
+        $this->get('/kamar/vip')
+            ->assertOk()
+            ->assertSee('Silahkan membuat akun untuk melanjutkan pemesanan kamar.');
         $this->get('/kamar/1')->assertOk();
     }
 

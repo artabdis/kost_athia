@@ -110,6 +110,31 @@
             cursor: pointer;
         }
 
+        .payment-proof {
+            display: block;
+            max-width: 260px;
+            max-height: 220px;
+            margin: 12px 0;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .payment-note {
+            width: 100%;
+            margin: 8px 0;
+            padding: 9px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+        }
+
         @media (max-width: 600px) {
             .navbar {
                 padding: 18px 20px;
@@ -162,21 +187,16 @@
             </span>
         </section>
 
+        @if (session('success'))
+            <div class="alert">{{ session('success') }}</div>
+        @endif
+
         {{-- DASHBOARD ADMIN --}}
         @if (Auth::user()->role === 'admin')
 
-            <h2 class="admin-title">Dashboard Administrator</h2>
+            <h2 class="admin-title">Dashboard Administrator - Verifikasi Pembayaran</h2>
 
             <div class="cards">
-
-                <div class="card">
-                    <h3>Kelola Pengguna</h3>
-                    <p>
-                        Mengelola akun, data pengguna,
-                        dan hak akses aplikasi.
-                    </p>
-                    <a href="#">Kelola pengguna &rarr;</a>
-                </div>
 
                 <div class="card">
                     <h3>Kelola Kamar</h3>
@@ -189,16 +209,39 @@
                     </a>
                 </div>
 
-                <div class="card">
-                    <h3>Laporan</h3>
-                    <p>
-                        Melihat dan mengelola laporan
-                        aktivitas aplikasi.
-                    </p>
-                    <a href="#">Lihat laporan &rarr;</a>
-                </div>
-
             </div>
+
+            <h2 class="admin-title" style="margin-top: 30px;">Pembayaran Menunggu Verifikasi</h2>
+
+            @forelse ($payments as $payment)
+                <section class="card" style="margin-bottom: 16px;">
+                    <h3>{{ $payment->name }}</h3>
+                    <p>{{ $payment->email }}</p>
+                    <p>Status: {{ ucfirst($payment->payment_status) }}</p>
+                    <a href="{{ route('admin.payment.proof', $payment) }}" target="_blank" rel="noopener">
+                        <img
+                            class="payment-proof"
+                            src="{{ route('admin.payment.proof', $payment) }}"
+                            alt="Bukti pembayaran {{ $payment->name }}">
+                    </a>
+
+                    <form action="{{ route('admin.payment.verify', $payment) }}" method="POST">
+                        @csrf
+                        <label for="note-{{ $payment->id }}">Catatan (wajib diisi jika menolak)</label>
+                        <input class="payment-note" id="note-{{ $payment->id }}" type="text" name="note" maxlength="1000">
+                        <button class="logout" type="submit" name="status" value="approved">
+                            Verifikasi pembayaran
+                        </button>
+                        <button class="logout" type="submit" name="status" value="rejected">
+                            Tolak bukti
+                        </button>
+                    </form>
+                </section>
+            @empty
+                <div class="card">
+                    <p>Belum ada pembayaran yang menunggu verifikasi.</p>
+                </div>
+            @endforelse
 
         {{-- DASHBOARD USER --}}
         @elseif (Auth::user()->role === 'user')
@@ -240,31 +283,6 @@
 
         @endif
 
-        <form action="{{ route('logout') }}" method="POST">
-    @csrf
-
-    <button type="submit" class="btn-logout">
-        Logout
-    </button>
-    </form>
-
-    <style>
-        .btn-logout {
-            background-color: #dc2626;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: background-color 0.2s;
-        }
-
-        .btn-logout:hover {
-            background-color: #b91c1c;
-        }
-    </style>                                            
     </main>
 
 </body>

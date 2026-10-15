@@ -174,6 +174,35 @@
             transform: scale(0.98);
         }
 
+        .booking-dialog {
+            max-width: 420px;
+            margin: auto;
+            padding: 28px;
+            border: 0;
+            border-radius: 14px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            color: #1f2937;
+        }
+
+        .booking-dialog::backdrop {
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        .booking-dialog h2 { margin-bottom: 12px; }
+        .booking-dialog p { margin-bottom: 20px; line-height: 1.6; color: #4b5563; }
+        .booking-dialog-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+        .booking-dialog-actions a,
+        .booking-dialog-actions button {
+            padding: 10px 14px;
+            border: 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font: inherit;
+            font-weight: 600;
+        }
+        .booking-dialog-actions a { background: #2563eb; color: white; }
+        .booking-dialog-actions button { background: #e5e7eb; color: #1f2937; }
+
         /* RESPONSIVE */
         @media (max-width: 900px) {
             .detail-wrapper {
@@ -205,7 +234,11 @@
             <a href="{{ url('/#kontak') }}">Kontak</a>
         </div>
         <div class="nav-buttons">
-            <a href="{{ route('login') }}" class="btn-login">Masuk</a>
+            @auth
+                <a href="{{ route('dashboard') }}" class="btn-login">Dashboard</a>
+            @else
+                <a href="{{ route('login') }}" class="btn-login">Masuk</a>
+            @endauth
         </div>
     </nav>
 
@@ -249,12 +282,34 @@
                 </div>
 
                 <!-- Tombol Booking Warna Hijau -->
-                <a href="{{ url('/kamar/vip/booking') }}" class="btn-booking">
-                    Booking Kamar Ini
-                </a>
+                @auth
+                    <a href="{{ route('kamar.vip.booking') }}" class="btn-booking">Booking Kamar Ini</a>
+                @else
+                    <button type="button" class="btn-booking" id="booking-button">
+                        Booking Kamar Ini
+                    </button>
+                @endauth
             </div>
         </div>
     </div>
+
+    @guest
+        <dialog class="booking-dialog" id="booking-dialog" aria-labelledby="booking-dialog-title">
+            <h2 id="booking-dialog-title">Buat akun untuk booking</h2>
+            <p>Silahkan membuat akun untuk melanjutkan pemesanan kamar.</p>
+            <div class="booking-dialog-actions">
+                <a href="{{ route('register') }}">Buat akun</a>
+                <a href="{{ route('login') }}">Sudah punya akun? Masuk</a>
+                <button type="button" id="close-booking-dialog">Tutup</button>
+            </div>
+        </dialog>
+
+        <script>
+            const bookingDialog = document.getElementById('booking-dialog');
+            document.getElementById('booking-button').addEventListener('click', () => bookingDialog.showModal());
+            document.getElementById('close-booking-dialog').addEventListener('click', () => bookingDialog.close());
+        </script>
+    @endguest
 
 </body>
 </html>
