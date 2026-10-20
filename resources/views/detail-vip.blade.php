@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,21 +10,71 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #f9fafb; color: #1f2937; }
-        a { text-decoration: none; color: inherit; }
-        
-        .navbar {
-            height: 75px; display: flex; align-items: center; justify-content: space-between;
-            padding: 0 7%; border-bottom: 1px solid #eee; background: white;
-            position: sticky; top: 0; z-index: 100;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .logo { font-size: 24px; font-weight: 800; color: #2563eb; }
-        .nav-menu { display: flex; align-items: center; gap: 32px; font-size: 14px; font-weight: 500; }
-        .nav-menu a { color: #4b5563; transition: 0.2s; }
-        .nav-menu a:hover, .nav-menu a.active { color: #2563eb; }
-        .nav-buttons { display: flex; gap: 10px; align-items: center; }
-        .btn-login { padding: 10px 18px; color: #2563eb; font-weight: 600; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f9fafb;
+            color: #1f2937;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .navbar {
+            height: 75px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 7%;
+            border-bottom: 1px solid #eee;
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #2563eb;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-menu a {
+            color: #4b5563;
+            transition: 0.2s;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            color: #2563eb;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn-login {
+            padding: 10px 18px;
+            color: #2563eb;
+            font-weight: 600;
+        }
 
         /* DETAIL CONTAINER */
         .container {
@@ -42,6 +93,7 @@
             margin-bottom: 24px;
             transition: color 0.2s;
         }
+
         .back-link:hover {
             color: #2563eb;
         }
@@ -54,7 +106,7 @@
             padding: 30px;
             border-radius: 16px;
             border: 1px solid #e5e7eb;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
         }
 
         .detail-image-box {
@@ -82,7 +134,12 @@
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .room-status.unavailable {
+            background: rgba(254, 226, 226, 0.95);
+            color: #b91c1c;
         }
 
         .detail-info {
@@ -188,9 +245,22 @@
             background: rgba(15, 23, 42, 0.6);
         }
 
-        .booking-dialog h2 { margin-bottom: 12px; }
-        .booking-dialog p { margin-bottom: 20px; line-height: 1.6; color: #4b5563; }
-        .booking-dialog-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+        .booking-dialog h2 {
+            margin-bottom: 12px;
+        }
+
+        .booking-dialog p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #4b5563;
+        }
+
+        .booking-dialog-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
         .booking-dialog-actions a,
         .booking-dialog-actions button {
             padding: 10px 14px;
@@ -200,23 +270,41 @@
             font: inherit;
             font-weight: 600;
         }
-        .booking-dialog-actions a { background: #2563eb; color: white; }
-        .booking-dialog-actions button { background: #e5e7eb; color: #1f2937; }
+
+        .booking-dialog-actions a {
+            background: #2563eb;
+            color: white;
+        }
+
+        .booking-dialog-actions button {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
 
         /* RESPONSIVE */
         @media (max-width: 900px) {
             .detail-wrapper {
                 grid-template-columns: 1fr;
             }
+
             .detail-image-box {
                 height: 300px;
             }
         }
 
         @media (max-width: 600px) {
-            .navbar { padding: 0 5%; }
-            .container { padding: 0 5%; margin: 20px auto; }
-            .detail-wrapper { padding: 20px; }
+            .navbar {
+                padding: 0 5%;
+            }
+
+            .container {
+                padding: 0 5%;
+                margin: 20px auto;
+            }
+
+            .detail-wrapper {
+                padding: 20px;
+            }
         }
     </style>
 </head>
@@ -250,25 +338,34 @@
 
         <div class="detail-wrapper">
             <!-- Sisi Kiri: Gambar & Status -->
+            @php
+                $vipStatus = $room?->status ?? 'belum tersedia';
+            @endphp
             <div class="detail-image-box">
-                <img class="detail-image" src="https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=900&q=80" alt="Kamar VIP">
-                <span class="room-status">● Tersedia</span>
+                <img class="detail-image"
+                    src="https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=900&q=80"
+                    alt="Kamar VIP">
+                <span class="room-status {{ $vipStatus === 'tersedia' ? '' : 'unavailable' }}">
+                    ● {{ ucfirst($vipStatus) }}
+                </span>
             </div>
 
             <!-- Sisi Kanan: Informasi & Booking -->
             <div class="detail-info">
                 <div class="detail-header">
-                    <h1>Kamar VIP</h1>
-                    <div class="detail-location">📍 Lantai Utama (Akses Eksklusif)</div>
+                    <h1>{{ $room?->nama ?? 'Kamar VIP' }}</h1>
+                    <div class="detail-location">📍 {{ $room?->lokasi ?? 'Lantai Utama (Akses Eksklusif)' }}</div>
                 </div>
 
                 <div class="price-tag">
-                    Rp1.500.000 <span>/ bulan</span>
+                    Rp{{ number_format($room?->harga ?? 1500000, 0, ',', '.') }} <span>/ bulan</span>
                 </div>
 
                 <div class="section-title">Deskripsi Kamar</div>
                 <p class="description">
-                    Kamar eksklusif tipe VIP dengan ukuran lebih luas, pencahayaan alami yang baik, serta ventilasi optimal. Sangat cocok bagi Anda yang menginginkan privasi dan kenyamanan tingkat tinggi selama beristirahat.
+                    Kamar eksklusif tipe VIP dengan ukuran lebih luas, pencahayaan alami yang baik, serta ventilasi
+                    optimal. Sangat cocok bagi Anda yang menginginkan privasi dan kenyamanan tingkat tinggi selama
+                    beristirahat.
                 </p>
 
                 <div class="section-title">Fasilitas Utama</div>
@@ -281,35 +378,44 @@
                     <div class="facility-item">📦 Lemari Pakaian Besar</div>
                 </div>
 
-                <!-- Tombol Booking Warna Hijau -->
-                @auth
-                    <a href="{{ route('kamar.vip.booking') }}" class="btn-booking">Booking Kamar Ini</a>
+                <!-- Tombol Booking -->
+                @if ($room?->status === 'tersedia')
+                    @auth
+                        <a href="{{ route('kamar.vip.booking') }}" class="btn-booking">
+                            Booking Kamar Ini
+                        </a>
+                    @else
+                        <button type="button" class="btn-booking" id="booking-button">Booking</button>
+                    @endauth
                 @else
-                    <button type="button" class="btn-booking" id="booking-button">
-                        Booking Kamar Ini
+                    <button type="button" class="btn-booking" disabled>
+                        Kamar tidak tersedia untuk booking
                     </button>
-                @endauth
+                @endif
             </div>
         </div>
     </div>
 
     @guest
-        <dialog class="booking-dialog" id="booking-dialog" aria-labelledby="booking-dialog-title">
-            <h2 id="booking-dialog-title">Buat akun untuk booking</h2>
-            <p>Silahkan membuat akun untuk melanjutkan pemesanan kamar.</p>
-            <div class="booking-dialog-actions">
-                <a href="{{ route('register') }}">Buat akun</a>
-                <a href="{{ route('login') }}">Sudah punya akun? Masuk</a>
-                <button type="button" id="close-booking-dialog">Tutup</button>
-            </div>
-        </dialog>
+        @if ($room?->status === 'tersedia')
+            <dialog class="booking-dialog" id="booking-dialog" aria-labelledby="booking-dialog-title">
+                <h2 id="booking-dialog-title">Buat akun untuk booking</h2>
+                <p>Silahkan membuat akun untuk melanjutkan pemesanan kamar.</p>
+                <div class="booking-dialog-actions">
+                    <a href="{{ route('register') }}">Buat akun</a>
+                    <a href="{{ route('login') }}">Sudah punya akun? Masuk</a>
+                    <button type="button" id="close-booking-dialog">Tutup</button>
+                </div>
+            </dialog>
 
-        <script>
-            const bookingDialog = document.getElementById('booking-dialog');
-            document.getElementById('booking-button').addEventListener('click', () => bookingDialog.showModal());
-            document.getElementById('close-booking-dialog').addEventListener('click', () => bookingDialog.close());
-        </script>
+            <script>
+                const bookingDialog = document.getElementById('booking-dialog');
+                document.getElementById('booking-button').addEventListener('click', () => bookingDialog.showModal());
+                document.getElementById('close-booking-dialog').addEventListener('click', () => bookingDialog.close());
+            </script>
+        @endif
     @endguest
 
 </body>
+
 </html>

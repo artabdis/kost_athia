@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\RoomManagementController;
 use App\Http\Controllers\RoomsController;
 
 Route::get('/', function () {
@@ -30,15 +31,31 @@ Route::middleware('auth')->group(function () {
         ->name('admin.payment.proof');
     Route::post('/admin/users/{user}/payment', [PaymentController::class, 'verify'])
         ->name('admin.payment.verify');
+
+    Route::prefix('admin/rooms')->name('admin.rooms.')->controller(RoomManagementController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{room}/edit', 'edit')->name('edit');
+        Route::put('/{room}', 'update')->name('update');
+        Route::delete('/{room}', 'destroy')->name('destroy');
+    });
 });
 
-Route::get('/kamar', [RoomsController::class, 'index'])->name('kamar');
-Route::get('/kamar/vip', [RoomsController::class, 'showVip'])->name('kamar.vip');
-Route::get('/kamar/{id}', [RoomsController::class, 'show'])->name('kamar.detail');
+Route::get('/kamar', [RoomsController::class, 'index'])
+    ->name('kamar');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/kamar/vip/booking', [RoomsController::class, 'bookingVip'])->name('kamar.vip.booking');
-});
+Route::get('/kamar/vip', [RoomsController::class, 'showVip'])
+    ->name('kamar.vip');
+
+Route::get('/kamar/{id}', [RoomsController::class, 'show'])
+    ->name('kamar.detail');
+
+Route::get('/kamar/vip/booking', [RoomsController::class, 'bookingVip'])
+    ->name('kamar.vip.booking');
+
+Route::get('/kamar/{id}/booking', [RoomsController::class, 'booking'])
+    ->name('kamar.booking');
 
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')

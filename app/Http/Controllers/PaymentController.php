@@ -88,7 +88,11 @@ class PaymentController extends Controller
     public function proof(User $user): StreamedResponse
     {
         abort_unless(Auth::user()->role === 'admin', 403);
+<<<<<<< HEAD
         abort_unless($user->payment_status === 'submitted' && $user->payment_proof, 404);
+=======
+        abort_unless($user->role === 'user' && $user->payment_proof, 404);
+>>>>>>> origin/fitur-kost
 
         return Storage::disk('local')->response(
             $user->payment_proof,
