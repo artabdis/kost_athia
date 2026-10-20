@@ -7,35 +7,31 @@ use Illuminate\View\View;
 
 class RoomsController extends Controller
 {
-    private const LEGACY_ROOM_DETAILS = [
-        'A01' => [
-            'nama' => 'Kamar A01',
-            'lokasi' => 'Lantai 1',
-            'harga' => 750000,
-            'image' => 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1000&q=80',
-        ],
-        'B01' => [
-            'nama' => 'Kamar B01',
-            'lokasi' => 'Lantai 2',
-            'harga' => 1000000,
-            'image' => 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1000&q=80',
-        ],
-        'B02' => [
-            'nama' => 'Kamar B02',
-            'lokasi' => 'Lantai 2',
-            'harga' => 1000000,
-            'image' => 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1000&q=80',
-        ],
-    ];
+    /**
+     * Daftar gambar berdasarkan kode kamar.
+     */
+    private function images(): array
+    {
+        return [
+            'A01' => asset('images/km1.jpg'),
+            'B01' => asset('images/tipe b.jpg'),
+            'B02' => asset('images/km2 dan 3.jpg'),
+            'VIP' => asset('images/vip.jpg'),
+        ];
+    }
 
     /**
      * Menampilkan daftar kamar.
      */
     public function index()
     {
-        $kamar = Room::query()->orderBy('kode_kamar')->get();
+        $kamar = Room::query()
+            ->orderBy('kode_kamar')
+            ->get();
 
-        return view('kamar', compact('kamar'));
+        $images = $this->images();
+
+        return view('kamar', compact('kamar', 'images'));
     }
 
     /**
@@ -45,32 +41,18 @@ class RoomsController extends Controller
     {
         $room = ctype_digit($id)
             ? Room::query()->find($id)
-            : Room::query()->where('kode_kamar', $id)->first();
+            : Room::query()->where('kode_kamar', strtoupper($id))->first();
 
-        if ($room) {
-            return view('detail-kamar', [
-                'kamar' => $room,
-                'image' => self::LEGACY_ROOM_DETAILS[$room->kode_kamar]['image'] ?? null,
-                'bookingEnabled' => $room->exists && $room->status === 'tersedia',
-            ]);
+        if (!$room) {
+            abort(404);
         }
 
-        $code = strtoupper($id);
-        abort_unless(isset(self::LEGACY_ROOM_DETAILS[$code]), 404);
-
-        $details = self::LEGACY_ROOM_DETAILS[$code];
-        $kamar = new Room([
-            'kode_kamar' => $code,
-            'nama' => $details['nama'],
-            'lokasi' => $details['lokasi'],
-            'harga' => $details['harga'],
-            'status' => null,
-        ]);
+        $images = $this->images();
 
         return view('detail-kamar', [
-            'kamar' => $kamar,
-            'image' => $details['image'],
-            'bookingEnabled' => false,
+            'kamar' => $room,
+            'image' => $images[$room->kode_kamar] ?? null,
+            'bookingEnabled' => $room->status === 'tersedia',
         ]);
     }
 
@@ -79,8 +61,15 @@ class RoomsController extends Controller
      */
     public function showVip(): View
     {
+        $room = Room::query()
+            ->where('kode_kamar', 'VIP')
+            ->first();
+
+        $images = $this->images();
+
         return view('detail-vip', [
-            'room' => Room::query()->where('kode_kamar', 'VIP')->first(),
+            'room' => $room,
+            'image' => $images['VIP'],
         ]);
     }
 
@@ -99,7 +88,7 @@ class RoomsController extends Controller
 
         session(['booking_room_id' => $kamar->id]);
 
-        if (! auth()->check()) {
+        if (!auth()->check()) {
             return redirect()
                 ->route('register')
                 ->with('success', 'Silakan registrasi untuk melanjutkan booking.');
@@ -113,9 +102,11 @@ class RoomsController extends Controller
      */
     public function bookingVip()
     {
-        $kamar = Room::query()->where('kode_kamar', 'VIP')->first();
+        $kamar = Room::query()
+            ->where('kode_kamar', 'VIP')
+            ->first();
 
-        if (! $kamar) {
+        if (!$kamar) {
             return redirect()
                 ->route('kamar')
                 ->with('error', 'Data kamar VIP belum tersedia.');
@@ -129,7 +120,7 @@ class RoomsController extends Controller
 
         session(['booking_room_id' => $kamar->id]);
 
-        if (! auth()->check()) {
+        if (!auth()->check()) {
             return redirect()
                 ->route('register')
                 ->with('success', 'Silakan registrasi untuk melanjutkan booking.');

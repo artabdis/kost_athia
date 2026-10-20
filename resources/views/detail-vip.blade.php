@@ -5,9 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detail Kamar VIP - Kost Athia</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
     <style>
         * {
@@ -221,6 +224,8 @@
             transition: background 0.2s ease, transform 0.1s ease;
             box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
             margin-top: auto;
+            border: none;
+            cursor: pointer;
         }
 
         .btn-booking:hover {
@@ -229,6 +234,12 @@
 
         .btn-booking:active {
             transform: scale(0.98);
+        }
+
+        .btn-booking:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            box-shadow: none;
         }
 
         .booking-dialog {
@@ -297,6 +308,10 @@
                 padding: 0 5%;
             }
 
+            .nav-menu {
+                gap: 15px;
+            }
+
             .container {
                 padding: 0 5%;
                 margin: 20px auto;
@@ -304,6 +319,14 @@
 
             .detail-wrapper {
                 padding: 20px;
+            }
+
+            .detail-header h1 {
+                font-size: 24px;
+            }
+
+            .price-tag {
+                font-size: 22px;
             }
         }
     </style>
@@ -313,107 +336,258 @@
 
     <!-- NAVBAR -->
     <nav class="navbar">
-        <a href="{{ url('/') }}" class="logo">Kost Athia</a>
+
+        <a href="{{ url('/') }}" class="logo">
+            Kost Athia
+        </a>
+
         <div class="nav-menu">
-            <a href="{{ url('/') }}">Beranda</a>
-            <a href="{{ url('/kamar') }}" class="active">Kamar</a>
-            <a href="{{ url('/#fasilitas') }}">Fasilitas</a>
-            <a href="{{ url('/#tentang') }}">Tentang</a>
-            <a href="{{ url('/#kontak') }}">Kontak</a>
+            <a href="{{ url('/') }}">
+                Beranda
+            </a>
+
+            <a href="{{ url('/kamar') }}" class="active">
+                Kamar
+            </a>
+
+            <a href="{{ url('/#fasilitas') }}">
+                Fasilitas
+            </a>
+
+            <a href="{{ url('/#tentang') }}">
+                Tentang
+            </a>
+
+            <a href="{{ url('/#kontak') }}">
+                Kontak
+            </a>
         </div>
+
         <div class="nav-buttons">
+
             @auth
-                <a href="{{ route('dashboard') }}" class="btn-login">Dashboard</a>
+                <a href="{{ route('dashboard') }}" class="btn-login">
+                    Dashboard
+                </a>
             @else
-                <a href="{{ route('login') }}" class="btn-login">Masuk</a>
+                <a href="{{ route('login') }}" class="btn-login">
+                    Masuk
+                </a>
             @endauth
+
         </div>
+
     </nav>
+
 
     <!-- MAIN CONTENT -->
     <div class="container">
+
         <a href="{{ url('/kamar') }}" class="back-link">
             &larr; Kembali ke Daftar Kamar
         </a>
 
+
         <div class="detail-wrapper">
-            <!-- Sisi Kiri: Gambar & Status -->
+
+            <!-- SISI KIRI: GAMBAR & STATUS -->
             @php
                 $vipStatus = $room?->status ?? 'belum tersedia';
             @endphp
+
             <div class="detail-image-box">
-                <img class="detail-image"
-                    src="https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=900&q=80"
-                    alt="Kamar VIP">
+
+                <!-- GAMBAR KAMAR VIP -->
+                <img
+                    class="detail-image"
+                    src="{{ asset('images/vip.jpg') }}"
+                    alt="Kamar VIP Kost Athia"
+                >
+
                 <span class="room-status {{ $vipStatus === 'tersedia' ? '' : 'unavailable' }}">
                     ● {{ ucfirst($vipStatus) }}
                 </span>
+
             </div>
 
-            <!-- Sisi Kanan: Informasi & Booking -->
+
+            <!-- SISI KANAN: INFORMASI & BOOKING -->
             <div class="detail-info">
+
                 <div class="detail-header">
-                    <h1>{{ $room?->nama ?? 'Kamar VIP' }}</h1>
-                    <div class="detail-location">📍 {{ $room?->lokasi ?? 'Lantai Utama (Akses Eksklusif)' }}</div>
+
+                    <h1>
+                        {{ $room?->nama ?? 'Kamar VIP' }}
+                    </h1>
+
+                    <div class="detail-location">
+                        📍 {{ $room?->lokasi ?? 'Lantai Utama (Akses Eksklusif)' }}
+                    </div>
+
                 </div>
+
 
                 <div class="price-tag">
-                    Rp{{ number_format($room?->harga ?? 1500000, 0, ',', '.') }} <span>/ bulan</span>
+                    Rp{{ number_format($room?->harga ?? 1500000, 0, ',', '.') }}
+                    <span>/ bulan</span>
                 </div>
 
-                <div class="section-title">Deskripsi Kamar</div>
+
+                <div class="section-title">
+                    Deskripsi Kamar
+                </div>
+
                 <p class="description">
-                    Kamar eksklusif tipe VIP dengan ukuran lebih luas, pencahayaan alami yang baik, serta ventilasi
-                    optimal. Sangat cocok bagi Anda yang menginginkan privasi dan kenyamanan tingkat tinggi selama
-                    beristirahat.
+                    Kamar eksklusif tipe VIP dengan ukuran lebih luas,
+                    pencahayaan alami yang baik, serta ventilasi optimal.
+                    Sangat cocok bagi Anda yang menginginkan privasi dan
+                    kenyamanan tingkat tinggi selama beristirahat.
                 </p>
 
-                <div class="section-title">Fasilitas Utama</div>
-                <div class="facilities-list">
-                    <div class="facility-item">🛏️ Kasur Springbed Queen Size</div>
-                    <div class="facility-item">❄️ AC (Air Conditioner)</div>
-                    <div class="facility-item">🚿 Kamar Mandi Dalam (Water Heater)</div>
-                    <div class="facility-item">🪑 Meja & Kursi Kerja</div>
-                    <div class="facility-item">📶 Wi-Fi Cepat (Dedicated)</div>
-                    <div class="facility-item">📦 Lemari Pakaian Besar</div>
+
+                <div class="section-title">
+                    Fasilitas Utama
                 </div>
 
-                <!-- Tombol Booking -->
+                <div class="facilities-list">
+
+                    <div class="facility-item">
+                        🛏️ Kasur Springbed Queen Size
+                    </div>
+
+                    <div class="facility-item">
+                        ❄️ AC (Air Conditioner)
+                    </div>
+
+                    <div class="facility-item">
+                        🚿 Kamar Mandi Dalam (Water Heater)
+                    </div>
+
+                    <div class="facility-item">
+                        🪑 Meja & Kursi Kerja
+                    </div>
+
+                    <div class="facility-item">
+                        📶 Wi-Fi Cepat (Dedicated)
+                    </div>
+
+                    <div class="facility-item">
+                        📦 Lemari Pakaian Besar
+                    </div>
+
+                </div>
+
+
+                <!-- TOMBOL BOOKING -->
                 @if ($room?->status === 'tersedia')
+
                     @auth
-                        <a href="{{ route('kamar.vip.booking') }}" class="btn-booking">
-                            Booking Kamar Ini
+
+                        <a
+                            href="{{ route('kamar.vip.booking') }}"
+                            class="btn-booking"
+                        >
+                            Booking
                         </a>
+
                     @else
-                        <button type="button" class="btn-booking" id="booking-button">Booking</button>
+
+                        <button
+                            type="button"
+                            class="btn-booking"
+                            id="booking-button"
+                        >
+                            Booking
+                        </button>
+
                     @endauth
+
                 @else
-                    <button type="button" class="btn-booking" disabled>
+
+                    <button
+                        type="button"
+                        class="btn-booking"
+                        disabled
+                    >
                         Kamar tidak tersedia untuk booking
                     </button>
+
                 @endif
+
             </div>
+
         </div>
+
     </div>
 
+
+    <!-- DIALOG UNTUK USER YANG BELUM LOGIN -->
     @guest
+
         @if ($room?->status === 'tersedia')
-            <dialog class="booking-dialog" id="booking-dialog" aria-labelledby="booking-dialog-title">
-                <h2 id="booking-dialog-title">Buat akun untuk booking</h2>
-                <p>Silahkan membuat akun untuk melanjutkan pemesanan kamar.</p>
+
+            <dialog
+                class="booking-dialog"
+                id="booking-dialog"
+                aria-labelledby="booking-dialog-title"
+            >
+
+                <h2 id="booking-dialog-title">
+                    Buat akun untuk booking
+                </h2>
+
+                <p>
+                    Silahkan membuat akun untuk melanjutkan
+                    pemesanan kamar.
+                </p>
+
                 <div class="booking-dialog-actions">
-                    <a href="{{ route('register') }}">Buat akun</a>
-                    <a href="{{ route('login') }}">Sudah punya akun? Masuk</a>
-                    <button type="button" id="close-booking-dialog">Tutup</button>
+
+                    <a href="{{ route('register') }}">
+                        Buat akun
+                    </a>
+
+                    <a href="{{ route('login') }}">
+                        Sudah punya akun? Masuk
+                    </a>
+
+                    <button
+                        type="button"
+                        id="close-booking-dialog"
+                    >
+                        Tutup
+                    </button>
+
                 </div>
+
             </dialog>
 
+
             <script>
-                const bookingDialog = document.getElementById('booking-dialog');
-                document.getElementById('booking-button').addEventListener('click', () => bookingDialog.showModal());
-                document.getElementById('close-booking-dialog').addEventListener('click', () => bookingDialog.close());
+                const bookingDialog =
+                    document.getElementById('booking-dialog');
+
+                const bookingButton =
+                    document.getElementById('booking-button');
+
+                const closeBookingDialog =
+                    document.getElementById('close-booking-dialog');
+
+                if (bookingButton) {
+                    bookingButton.addEventListener('click', () => {
+                        bookingDialog.showModal();
+                    });
+                }
+
+                if (closeBookingDialog) {
+                    closeBookingDialog.addEventListener('click', () => {
+                        bookingDialog.close();
+                    });
+                }
             </script>
+
         @endif
+
     @endguest
 
 </body>

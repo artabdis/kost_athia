@@ -133,7 +133,7 @@
                     <img class="detail-image" src="{{ $image }}" alt="Foto {{ $kamar->nama }}">
                 @endif
                 <span class="room-status {{ $status === 'tersedia' ? 'available' : ($status === 'terisi' ? 'occupied' : ($status === 'belum_dikonfirmasi' ? 'unconfirmed' : '')) }}">
-                    ● {{ $statusLabels[$status] ?? 'Status belum tersedia' }}
+                    ● {{ $statusLabels[$status] ?? 'Full' }}
                 </span>
             </div>
 
@@ -153,11 +153,15 @@
                     <span>/ bulan</span>
                 </div>
 
-                <h2 class="section-title">Deskripsi Kamar</h2>
-                <p class="description">Informasi deskripsi untuk kamar ini belum tersedia.</p>
+                <h2 class="section-title">Deskripsi</h2>
+                <p class="description">Kost Athia merupakan hunian yang nyaman, aman, 
+                    dan cocok bagi mahasiswa maupun pekerja.</p>
 
                 <h2 class="section-title">Fasilitas</h2>
-                <p class="description">Informasi fasilitas kamar ini belum tersedia.</p>
+                <p class="description">Tersedia berbagai fasilitas untuk menunjang kebutuhan penghuni,
+                     seperti kamar yang nyaman, tempat tidur, lemari pakaian, meja belajar, kamar mandi,
+                      akses Wi-Fi, listrik, serta lngkungan kos yang juga terjaga kebersihannya 
+                      sehingga penghuni dapat tinggal dengan nyaman dan aman.</p>
 
                 @if (! $statusKnown || $status === 'belum_dikonfirmasi')
                     <p class="notice">
@@ -171,7 +175,7 @@
                     @auth
                         <a href="{{ route('kamar.booking', $kamar->id) }}" class="btn-booking">Booking Kamar Ini</a>
                     @else
-                        <button type="button" class="btn-booking" id="booking-button">Booking Kamar Ini</button>
+                        <button type="button" class="btn-booking" id="booking-button">Booking</button>
                     @endauth
                 @elseif ($status === 'terisi')
                     <button type="button" class="btn-booking btn-disabled" disabled>Kamar Sudah Terisi</button>

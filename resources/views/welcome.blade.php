@@ -101,7 +101,6 @@
             <a href="{{ url('/') }}">Beranda</a>
             <a href="{{ url('/kamar') }}">Kamar</a>
             <a href="#fasilitas">Fasilitas</a>
-            <a href="#tentang">Tentang</a>
             <a href="#kontak">Kontak</a>
         </div>
         <div class="nav-buttons">
