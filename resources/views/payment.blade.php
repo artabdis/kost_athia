@@ -24,8 +24,8 @@
 <body>
     <main class="wrap">
         <div class="card">
-            <h1>Verifikasi Pembayaran</h1>
-            <p>Halo, {{ Auth::user()->name }}. Dashboard dapat dibuka setelah admin memverifikasi pembayaran Anda.</p>
+            <h1>Pembayaran</h1>
+            <p>Halo, {{ Auth::user()->name }}. Silakan kirim bukti pembayaran dan tunggu verifikasi admin. Dashboard dapat diakses setelah pembayaran disetujui.</p>
 
             @if (session('info'))
                 <div class="alert info">{{ session('info') }}</div>
@@ -37,7 +37,14 @@
                 <div class="alert error">{{ $errors->first() }}</div>
             @endif
 
-            <p><strong>Status saat ini:</strong> {{ ucfirst(Auth::user()->payment_status) }}</p>
+            <p><strong>Status saat ini:</strong>
+                @switch(Auth::user()->payment_status)
+                    @case('submitted') Menunggu verifikasi @break
+                    @case('approved') Lunas / disetujui @break
+                    @case('rejected') Ditolak @break
+                    @default Belum mengunggah
+                @endswitch
+            </p>
 
             @if (Auth::user()->payment_note)
                 <p class="alert error">Catatan admin: {{ Auth::user()->payment_note }}</p>

@@ -84,6 +84,10 @@
             font-weight: 600;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
+        .room-status.unavailable {
+            background: rgba(254, 226, 226, 0.95);
+            color: #b91c1c;
+        }
 
         .detail-info {
             display: flex;
@@ -250,20 +254,25 @@
 
         <div class="detail-wrapper">
             <!-- Sisi Kiri: Gambar & Status -->
+            @php
+                $vipStatus = $room?->status ?? 'belum tersedia';
+            @endphp
             <div class="detail-image-box">
                 <img class="detail-image" src="https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=900&q=80" alt="Kamar VIP">
-                <span class="room-status">● Tersedia</span>
+                <span class="room-status {{ $vipStatus === 'tersedia' ? '' : 'unavailable' }}">
+                    ● {{ ucfirst($vipStatus) }}
+                </span>
             </div>
 
             <!-- Sisi Kanan: Informasi & Booking -->
             <div class="detail-info">
                 <div class="detail-header">
-                    <h1>Kamar VIP</h1>
-                    <div class="detail-location">📍 Lantai Utama (Akses Eksklusif)</div>
+                    <h1>{{ $room?->nama ?? 'Kamar VIP' }}</h1>
+                    <div class="detail-location">📍 {{ $room?->lokasi ?? 'Lantai Utama (Akses Eksklusif)' }}</div>
                 </div>
 
                 <div class="price-tag">
-                    Rp1.500.000 <span>/ bulan</span>
+                    Rp{{ number_format($room?->harga ?? 1500000, 0, ',', '.') }} <span>/ bulan</span>
                 </div>
 
                 <div class="section-title">Deskripsi Kamar</div>
@@ -282,32 +291,25 @@
                 </div>
 
                 <!-- Tombol Booking -->
-                @auth
-
-                    @if (isset($kamar->id))
-                        {{-- Kamar A01, B01, B02 --}}
-                        <a href="{{ route('kamar.booking', $kamar->id) }}" class="btn-booking">
-                            Booking Kamar Ini
-                        </a>
-                    @else
-                        {{-- Kamar VIP --}}
+                @if ($room?->status === 'tersedia')
+                    @auth
                         <a href="{{ route('kamar.vip.booking') }}" class="btn-booking">
                             Booking Kamar Ini
                         </a>
-                    @endif
-
+                    @else
+                        <button type="button" class="btn-booking" id="booking-button">Booking</button>
+                    @endauth
                 @else
-
-                    <button type="button" class="btn-booking" id="booking-button">
-                        Booking
+                    <button type="button" class="btn-booking" disabled>
+                        Kamar tidak tersedia untuk booking
                     </button>
-
-                @endauth
+                @endif
             </div>
         </div>
     </div>
 
     @guest
+        @if ($room?->status === 'tersedia')
         <dialog class="booking-dialog" id="booking-dialog" aria-labelledby="booking-dialog-title">
             <h2 id="booking-dialog-title">Buat akun untuk booking</h2>
             <p>Silahkan membuat akun untuk melanjutkan pemesanan kamar.</p>
@@ -323,6 +325,7 @@
             document.getElementById('booking-button').addEventListener('click', () => bookingDialog.showModal());
             document.getElementById('close-booking-dialog').addEventListener('click', () => bookingDialog.close());
         </script>
+        @endif
     @endguest
 
 </body>

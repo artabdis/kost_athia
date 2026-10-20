@@ -196,6 +196,17 @@
             transition: transform 0.5s ease;
         }
 
+        .kamar-image-placeholder {
+            display: grid;
+            width: 100%;
+            height: 100%;
+            place-items: center;
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            color: #2563eb;
+            font-size: 28px;
+            font-weight: 800;
+        }
+
         .kamar-card:hover .kamar-image {
             transform: scale(1.05);
         }
@@ -210,6 +221,16 @@
             border-radius: 20px;
             font-size: 11px;
             font-weight: 600;
+        }
+
+        .kamar-status.unavailable {
+            background: rgba(254, 226, 226, 0.95);
+            color: #b91c1c;
+        }
+
+        .kamar-status.unconfirmed {
+            background: rgba(255, 251, 235, 0.95);
+            color: #92400e;
         }
 
         .kamar-content {
@@ -376,70 +397,14 @@
         </div>
     </nav>
 
-    @if(isset($detailKamar))
-
-        {{-- HALAMAN DETAIL KAMAR A01, B01, ATAU B02 --}}
-        <section class="section" style="background: #eff6ff; min-height: 80vh;">
-            <div class="detail-box">
-
-                <a href="{{ route('kamar') }}" class="back-link">
-                    &larr; Kembali ke daftar kamar
-                </a>
-
-                <h1>Detail Kamar {{ $detailKamar->kode_kamar }}</h1>
-
-                @if($detailKamar->kode_kamar === 'A01')
-                    <img
-                        src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1000&q=80"
-                        alt="Kamar A01"
-                        style="width: 100%; height: 300px; object-fit: cover; border-radius: 12px; margin-bottom: 20px;">
-                @elseif($detailKamar->kode_kamar === 'B01')
-                    <img
-                        src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1000&q=80"
-                        alt="Kamar B01"
-                        style="width: 100%; height: 300px; object-fit: cover; border-radius: 12px; margin-bottom: 20px;">
-                @elseif($detailKamar->kode_kamar === 'B02')
-                    <img
-                        src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1000&q=80"
-                        alt="Kamar B02"
-                        style="width: 100%; height: 300px; object-fit: cover; border-radius: 12px; margin-bottom: 20px;">
-                @endif
-
-                <p>
-                    <strong>Kode kamar:</strong>
-                    {{ $detailKamar->kode_kamar }}
-                </p>
-
-                <p>
-                    <strong>Lantai:</strong>
-                    {{ $detailKamar->kode_kamar === 'A01' ? 'Lantai 1' : 'Lantai 2' }}
-                </p>
-
-                <p>
-                    <strong>Status:</strong>
-                    {{ ucfirst($detailKamar->status) }}
-                </p>
-
-                <div class="detail-price">
-                    Rp{{ number_format($detailKamar->kode_kamar === 'A01' ? 750000 : 1000000, 0, ',', '.') }}
-                    <span style="font-size: 14px; color: #6b7280; font-weight: 400;">/bulan</span>
-                </div>
-
-                @if($detailKamar->status === 'tersedia')
-                    <a href="{{ route('kamar.booking', $detailKamar->id) }}"
-                       class="btn-hero-detail">
-                        Booking Kamar
-                    </a>
-                @else
-                    <p style="color: #dc2626; font-weight: 600;">
-                        Kamar ini sedang terisi.
-                    </p>
-                @endif
-
-            </div>
-        </section>
-
-    @else
+    @php
+        $vipRoom = $kamar->firstWhere('kode_kamar', 'VIP');
+        $roomStatusLabels = [
+            'tersedia' => 'Tersedia',
+            'terisi' => 'Terisi',
+            'belum_dikonfirmasi' => 'Belum dikonfirmasi',
+        ];
+    @endphp
 
         {{-- HALAMAN DAFTAR KAMAR --}}
         <section class="hero">
@@ -457,7 +422,7 @@
                     </a>
 
                     <span style="font-size: 18px; font-weight: 700; color: #2563eb;">
-                        Rp1.500.000
+                        Rp{{ number_format($vipRoom->harga ?? 1500000, 0, ',', '.') }}
                         <span style="font-size: 12px; color: #6b7280; font-weight: 400;">
                             /bulan
                         </span>
@@ -494,22 +459,22 @@
                             $roomA01 = $kamar->firstWhere('kode_kamar', 'A01');
                         @endphp
 
-                        <span class="kamar-status">
-                            {{ $roomA01 && $roomA01->status === 'tersedia' ? 'Tersedia' : 'Terisi' }}
+                        <span class="kamar-status {{ $roomA01?->status === 'tersedia' ? '' : ($roomA01?->status === 'terisi' ? 'unavailable' : 'unconfirmed') }}">
+                            {{ $roomStatusLabels[$roomA01?->status] ?? 'Status belum tersedia' }}
                         </span>
                     </div>
 
                     <div class="kamar-content">
-                        <h3>Kamar A01</h3>
+                        <h3>{{ $roomA01->nama ?? 'Kamar A01' }}</h3>
 
-                        <div class="kamar-location">📍 Lantai 1</div>
+                        <div class="kamar-location">📍 {{ $roomA01->lokasi ?? 'Lantai 1' }}</div>
 
                         <div class="kamar-bottom">
                             <div class="price">
-                                Rp750.000 <span>/bulan</span>
+                                Rp{{ number_format($roomA01->harga ?? 750000, 0, ',', '.') }} <span>/bulan</span>
                             </div>
 
-                            <a href="{{ url('/kamar/' . ($roomA01->id ?? 1)) }}" class="btn-detail">
+                            <a href="{{ route('kamar.detail', $roomA01->id ?? 'A01') }}" class="btn-detail">
                                 Detail
                             </a>
                         </div>
@@ -528,22 +493,22 @@
                             $roomB01 = $kamar->firstWhere('kode_kamar', 'B01');
                         @endphp
 
-                        <span class="kamar-status">
-                            {{ $roomB01 && $roomB01->status === 'tersedia' ? 'Tersedia' : 'Terisi' }}
+                        <span class="kamar-status {{ $roomB01?->status === 'tersedia' ? '' : ($roomB01?->status === 'terisi' ? 'unavailable' : 'unconfirmed') }}">
+                            {{ $roomStatusLabels[$roomB01?->status] ?? 'Status belum tersedia' }}
                         </span>
                     </div>
 
                     <div class="kamar-content">
-                        <h3>Kamar B01</h3>
+                        <h3>{{ $roomB01->nama ?? 'Kamar B01' }}</h3>
 
-                        <div class="kamar-location">📍 Lantai 2</div>
+                        <div class="kamar-location">📍 {{ $roomB01->lokasi ?? 'Lantai 2' }}</div>
 
                         <div class="kamar-bottom">
                             <div class="price">
-                                Rp1.000.000 <span>/bulan</span>
+                                Rp{{ number_format($roomB01->harga ?? 1000000, 0, ',', '.') }} <span>/bulan</span>
                             </div>
 
-                            <a href="{{ url('/kamar/' . ($roomB01->id ?? 2)) }}" class="btn-detail">
+                            <a href="{{ route('kamar.detail', $roomB01->id ?? 'B01') }}" class="btn-detail">
                                 Detail
                             </a>
                         </div>
@@ -562,22 +527,45 @@
                             $roomB02 = $kamar->firstWhere('kode_kamar', 'B02');
                         @endphp
 
-                        <span class="kamar-status">
-                            {{ $roomB02 && $roomB02->status === 'tersedia' ? 'Tersedia' : 'Terisi' }}
+                        <span class="kamar-status {{ $roomB02?->status === 'tersedia' ? '' : ($roomB02?->status === 'terisi' ? 'unavailable' : 'unconfirmed') }}">
+                            {{ $roomStatusLabels[$roomB02?->status] ?? 'Status belum tersedia' }}
                         </span>
                     </div>
 
-                    <div class="kamar-content">
-                        <h3>Kamar B02</h3>
+                    @foreach ($kamar->whereNotIn('kode_kamar', ['VIP', 'A01', 'B01', 'B02']) as $room)
+                        <div class="kamar-card">
+                            <div class="kamar-image-wrapper">
+                                <div class="kamar-image-placeholder" aria-label="Foto {{ $room->nama }} belum tersedia">
+                                    {{ $room->kode_kamar }}
+                                </div>
+                                <span class="kamar-status {{ $room->status === 'tersedia' ? '' : ($room->status === 'terisi' ? 'unavailable' : 'unconfirmed') }}">
+                                    {{ $roomStatusLabels[$room->status] ?? ucfirst($room->status) }}
+                                </span>
+                            </div>
+                            <div class="kamar-content">
+                                <h3>{{ $room->nama }}</h3>
+                                <div class="kamar-location">📍 {{ $room->lokasi }}</div>
+                                <div class="kamar-bottom">
+                                    <div class="price">
+                                        Rp{{ number_format($room->harga, 0, ',', '.') }} <span>/bulan</span>
+                                    </div>
+                                    <a href="{{ route('kamar.detail', $room->id) }}" class="btn-detail">Detail</a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
 
-                        <div class="kamar-location">📍 Lantai 2</div>
+                    <div class="kamar-content">
+                        <h3>{{ $roomB02->nama ?? 'Kamar B02' }}</h3>
+
+                        <div class="kamar-location">📍 {{ $roomB02->lokasi ?? 'Lantai 2' }}</div>
 
                         <div class="kamar-bottom">
                             <div class="price">
-                                Rp1.000.000 <span>/bulan</span>
+                                Rp{{ number_format($roomB02->harga ?? 1000000, 0, ',', '.') }} <span>/bulan</span>
                             </div>
 
-                            <a href="{{ url('/kamar/' . ($roomB02->id ?? 3)) }}" class="btn-detail">
+                            <a href="{{ route('kamar.detail', $roomB02->id ?? 'B02') }}" class="btn-detail">
                                 Detail
                             </a>
                         </div>
@@ -586,8 +574,6 @@
 
             </div>
         </section>
-
-    @endif
 
 </body>
 </html>
