@@ -5,9 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dashboard - Kost Athia</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
     <style>
         :root {
             color-scheme: light;
@@ -753,155 +756,357 @@
 </head>
 
 <body>
+
     @php
         $currentUser = Auth::user();
         $isAdmin = $currentUser->role === 'admin';
+
         $statusLabels = [
             'pending' => 'Belum mengunggah',
             'submitted' => 'Menunggu verifikasi',
             'approved' => 'Lunas / disetujui',
             'rejected' => 'Ditolak',
         ];
+
         $statusClasses = [
             'pending' => 'neutral',
             'submitted' => 'waiting',
             'approved' => 'approved',
             'rejected' => 'rejected',
         ];
+
         $roomStatusLabels = [
             'tersedia' => 'Tersedia',
             'terisi' => 'Terisi',
             'belum_dikonfirmasi' => 'Belum dikonfirmasi',
         ];
     @endphp
+
     <div class="app-shell">
+
         <aside class="sidebar" aria-label="Navigasi dashboard">
+
             <a class="brand" href="{{ route('dashboard') }}">
                 <span class="brand-mark" aria-hidden="true">A</span>
                 <span>Kost Athia</span>
             </a>
 
-            <p class="nav-label">Menu {{ $isAdmin ? 'Admin' : 'Penghuni' }}</p>
+            <p class="nav-label">
+                Menu {{ $isAdmin ? 'Admin' : 'Penghuni' }}
+            </p>
+
             <nav class="nav-links">
+
                 @if ($isAdmin)
-                    <a class="nav-link active" href="#overview"><span class="nav-icon"
-                            aria-hidden="true">⌂</span>Dashboard</a>
-                    <a class="nav-link" href="#rooms"><span class="nav-icon" aria-hidden="true">▦</span>Data Kamar</a>
-                    <a class="nav-link" href="#residents"><span class="nav-icon" aria-hidden="true">♙</span>Data
-                        Penghuni</a>
-                    <a class="nav-link" href="#payments"><span class="nav-icon"
-                            aria-hidden="true">Rp</span>Pembayaran</a>
-                    <a class="nav-link" href="#bookings"><span class="nav-icon" aria-hidden="true">◷</span>Data
-                        Booking</a>
+
+                    {{-- ==================== ADMIN ==================== --}}
+                    {{-- BAGIAN ADMIN TIDAK DIUBAH --}}
+
+                    <a class="nav-link active" href="#overview">
+                        <span class="nav-icon" aria-hidden="true">⌂</span>
+                        Dashboard
+                    </a>
+
+                    <a class="nav-link" href="#rooms">
+                        <span class="nav-icon" aria-hidden="true">▦</span>
+                        Data Kamar
+                    </a>
+
+                    <a class="nav-link" href="#residents">
+                        <span class="nav-icon" aria-hidden="true">♙</span>
+                        Data Penghuni
+                    </a>
+
+                    <a class="nav-link" href="#payments">
+                        <span class="nav-icon" aria-hidden="true">Rp</span>
+                        Pembayaran
+                    </a>
+
+                    <a class="nav-link" href="#bookings">
+                        <span class="nav-icon" aria-hidden="true">◷</span>
+                        Data Booking
+                    </a>
+
                 @else
-                    <a class="nav-link active" href="#overview"><span class="nav-icon"
-                            aria-hidden="true">⌂</span>Dashboard</a>
-                    <a class="nav-link" href="#my-rooms"><span class="nav-icon" aria-hidden="true">▦</span>Kamar
-                        Saya</a>
-                    <a class="nav-link" href="#my-payment"><span class="nav-icon"
-                            aria-hidden="true">Rp</span>Pembayaran</a>
-                    <a class="nav-link" href="#history"><span class="nav-icon" aria-hidden="true">◷</span>Riwayat
-                        Pembayaran</a>
-                    <a class="nav-link" href="#profile"><span class="nav-icon" aria-hidden="true">♙</span>Profil
-                        Saya</a>
+
+                    {{-- ==================== PENGHUNI ==================== --}}
+
+                    <a class="nav-link active" href="#overview">
+                        <span class="nav-icon" aria-hidden="true">⌂</span>
+                        Dashboard
+                    </a>
+
+                    <a class="nav-link" href="#my-rooms">
+                        <span class="nav-icon" aria-hidden="true">▦</span>
+                        Kamar Saya
+                    </a>
+
+                    <a class="nav-link" href="#my-payment">
+                        <span class="nav-icon" aria-hidden="true">Rp</span>
+                        Pembayaran
+                    </a>
+
+                    <a class="nav-link" href="#history">
+                        <span class="nav-icon" aria-hidden="true">◷</span>
+                        Riwayat Pembayaran
+                    </a>
+
+                    <a class="nav-link" href="#profile">
+                        <span class="nav-icon" aria-hidden="true">♙</span>
+                        Profil Saya
+                    </a>
+
                 @endif
+
                 <form class="mobile-logout" action="{{ route('logout') }}" method="POST">
                     @csrf
-                    <button class="nav-link" type="submit"><span class="nav-icon"
-                            aria-hidden="true">↪</span>Keluar</button>
+
+                    <button class="nav-link" type="submit">
+                        <span class="nav-icon" aria-hidden="true">↪</span>
+                        Keluar
+                    </button>
                 </form>
+
             </nav>
 
             <div class="sidebar-bottom">
+
                 <div class="account-mini">
                     <strong>{{ $currentUser->name }}</strong>
                     <span>{{ $currentUser->email }}</span>
                 </div>
+
                 <form class="logout-form" action="{{ route('logout') }}" method="POST">
                     @csrf
-                    <button class="logout-button" type="submit">Keluar dari akun</button>
+
+                    <button class="logout-button" type="submit">
+                        Keluar dari akun
+                    </button>
                 </form>
+
             </div>
+
         </aside>
 
         <main class="main-content" id="overview">
+
             <div class="content-wrap">
+
                 <header class="page-header">
+
                     <div>
-                        <p class="eyebrow">KOST ATHIA / DASHBOARD</p>
-                        <h1>Selamat datang, {{ $currentUser->name }}</h1>
+                        <p class="eyebrow">
+                            KOST ATHIA / DASHBOARD
+                        </p>
+
+                        <h1>
+                            Selamat datang, {{ $currentUser->name }}
+                        </h1>
+
                         <p class="page-subtitle">
                             {{ $isAdmin
                                 ? 'Pantau kondisi kamar, penghuni, booking, dan pembayaran.'
-                                : 'Kelola informasi kamar dan pantau status pembayaran Anda.' }}
+                                : 'Kelola informasi kamar dan pantau tagihan pembayaran Anda.' }}
                         </p>
                     </div>
-                    <span class="role-pill">{{ $isAdmin ? 'Administrator' : 'Penghuni' }}</span>
+
+                    <span class="role-pill">
+                        {{ $isAdmin ? 'Administrator' : 'Penghuni' }}
+                    </span>
+
                 </header>
 
                 @if (session('success'))
-                    <div class="alert success" role="status">{{ session('success') }}</div>
+                    <div class="alert success" role="status">
+                        {{ session('success') }}
+                    </div>
                 @endif
+
                 @if (session('info'))
-                    <div class="alert info" role="status">{{ session('info') }}</div>
+                    <div class="alert info" role="status">
+                        {{ session('info') }}
+                    </div>
                 @endif
+
                 @if ($errors->any())
-                    <div class="alert error" role="alert">{{ $errors->first() }}</div>
+                    <div class="alert error" role="alert">
+                        {{ $errors->first() }}
+                    </div>
                 @endif
+
+
+                {{-- ========================================================= --}}
+                {{-- ======================= ADMIN =========================== --}}
+                {{-- ========================================================= --}}
 
                 @if ($isAdmin)
+
+                    {{-- STATS ADMIN --}}
+
                     <section class="stats-grid" aria-label="Ringkasan dashboard">
+
                         <article class="stat-card">
+
                             <div class="stat-top">
-                                <span class="stat-label">Total Kamar</span>
-                                <span class="stat-icon" aria-hidden="true">▦</span>
+                                <span class="stat-label">
+                                    Total Kamar
+                                </span>
+
+                                <span class="stat-icon" aria-hidden="true">
+                                    ▦
+                                </span>
                             </div>
-                            <div class="stat-value">{{ number_format($stats['rooms']) }}</div>
-                            <p class="stat-description">Kamar tercatat di database.</p>
+
+                            <div class="stat-value">
+                                {{ number_format($stats['rooms']) }}
+                            </div>
+
+                            <p class="stat-description">
+                                Kamar tercatat di database.
+                            </p>
+
                         </article>
+
+
                         <article class="stat-card">
+
                             <div class="stat-top">
-                                <span class="stat-label">Kamar Tersedia</span>
-                                <span class="stat-icon" aria-hidden="true">✓</span>
+                                <span class="stat-label">
+                                    Kamar Tersedia
+                                </span>
+
+                                <span class="stat-icon" aria-hidden="true">
+                                    ✓
+                                </span>
                             </div>
-                            <div class="stat-value">{{ number_format($stats['availableRooms']) }}</div>
-                            <p class="stat-description">Berdasarkan status kamar tersedia.</p>
+
+                            <div class="stat-value">
+                                {{ number_format($stats['availableRooms']) }}
+                            </div>
+
+                            <p class="stat-description">
+                                Berdasarkan status kamar tersedia.
+                            </p>
+
                         </article>
+
+
                         <article class="stat-card">
+
                             <div class="stat-top">
-                                <span class="stat-label">Penghuni Terverifikasi</span>
-                                <span class="stat-icon" aria-hidden="true">♙</span>
+                                <span class="stat-label">
+                                    Penghuni Terverifikasi
+                                </span>
+
+                                <span class="stat-icon" aria-hidden="true">
+                                    ♙
+                                </span>
                             </div>
-                            <div class="stat-value">{{ number_format($stats['residents']) }}</div>
-                            <p class="stat-description">Akun penghuni dengan pembayaran disetujui.</p>
+
+                            <div class="stat-value">
+                                {{ number_format($stats['residents']) }}
+                            </div>
+
+                            <p class="stat-description">
+                                Akun penghuni dengan pembayaran disetujui.
+                            </p>
+
                         </article>
+
+
                         <article class="stat-card">
+
                             <div class="stat-top">
-                                <span class="stat-label">Menunggu Verifikasi</span>
-                                <span class="stat-icon" aria-hidden="true">◷</span>
+                                <span class="stat-label">
+                                    Menunggu Verifikasi
+                                </span>
+
+                                <span class="stat-icon" aria-hidden="true">
+                                    ◷
+                                </span>
                             </div>
-                            <div class="stat-value">{{ number_format($stats['pendingPayments']) }}</div>
-                            <p class="stat-description">Bukti pembayaran yang menunggu pemeriksaan.</p>
+
+                            <div class="stat-value">
+                                {{ number_format($stats['pendingPayments']) }}
+                            </div>
+
+                            <p class="stat-description">
+                                Bukti pembayaran yang menunggu pemeriksaan.
+                            </p>
+
                         </article>
+
                     </section>
 
+
+                    {{-- ==================== PEMBAYARAN ADMIN ==================== --}}
+
                     <section class="section" id="payments">
+
                         <div class="section-heading">
+
                             <div>
-                                <h2>Pembayaran terbaru</h2>
-                                <p>Status dan bukti pembayaran terbaru yang tersimpan pada akun penghuni.</p>
+
+                                <h2>Pembayaran</h2>
+
+                                <p>
+                                    Pantau pembayaran awal dan tagihan sewa penghuni Kost Athia.
+                                </p>
+
                             </div>
+
                         </div>
+
+
+                        {{-- PEMBAYARAN AWAL --}}
+
                         <div class="panel">
-                            @if ($payments->isEmpty())
-                                <div class="empty-state">
-                                    <strong>Belum ada bukti pembayaran.</strong>
-                                    Pembayaran penghuni yang sudah mengunggah bukti akan muncul di sini.
+
+                            <div class="panel-body" style="border-bottom: 1px solid var(--line);">
+
+                                <div style="display:flex; align-items:center; justify-content:space-between; gap:15px; flex-wrap:wrap;">
+
+                                    <div>
+
+                                        <h3 style="margin:0; font-size:14px;">
+                                            Verifikasi Pembayaran Awal
+                                        </h3>
+
+                                        <p style="margin:5px 0 0; color:var(--muted); font-size:11px;">
+                                            Bukti pembayaran awal yang dikirim penghuni setelah registrasi.
+                                        </p>
+
+                                    </div>
+
+                                    <span class="badge neutral">
+                                        {{ $payments->count() }} data
+                                    </span>
+
                                 </div>
+
+                            </div>
+
+
+                            @if ($payments->isEmpty())
+
+                                <div class="empty-state">
+
+                                    <strong>
+                                        Belum ada bukti pembayaran.
+                                    </strong>
+
+                                    Pembayaran awal penghuni yang sudah mengunggah bukti akan muncul di sini.
+
+                                </div>
+
                             @else
+
                                 <div class="table-wrap">
+
                                     <table>
+
                                         <thead>
+
                                             <tr>
                                                 <th>Penghuni</th>
                                                 <th>Pembaruan terakhir</th>
@@ -909,93 +1114,461 @@
                                                 <th>Bukti</th>
                                                 <th>Aksi</th>
                                             </tr>
+
                                         </thead>
+
                                         <tbody>
+
                                             @foreach ($payments as $payment)
+
                                                 <tr>
+
                                                     <td>
-                                                        <strong>{{ $payment->name }}</strong><br>
-                                                        <span class="muted">{{ $payment->email }}</span>
-                                                    </td>
-                                                    <td>{{ $payment->updated_at?->format('d M Y, H:i') ?? '—' }}</td>
-                                                    <td>
-                                                        <span
-                                                            class="badge {{ $statusClasses[$payment->payment_status] ?? 'neutral' }}">
-                                                            {{ $statusLabels[$payment->payment_status] ?? ucfirst($payment->payment_status) }}
+
+                                                        <strong>
+                                                            {{ $payment->name }}
+                                                        </strong>
+
+                                                        <br>
+
+                                                        <span class="muted">
+                                                            {{ $payment->email }}
                                                         </span>
+
                                                     </td>
+
                                                     <td>
+                                                        {{ $payment->updated_at?->format('d M Y, H:i') ?? '—' }}
+                                                    </td>
+
+                                                    <td>
+
+                                                        <span class="badge {{ $statusClasses[$payment->payment_status] ?? 'neutral' }}">
+
+                                                            {{ $statusLabels[$payment->payment_status] ?? ucfirst($payment->payment_status) }}
+
+                                                        </span>
+
+                                                    </td>
+
+                                                    <td>
+
                                                         <a class="proof-link"
                                                             href="{{ route('admin.payment.proof', $payment) }}"
-                                                            target="_blank" rel="noopener"
+                                                            target="_blank"
+                                                            rel="noopener"
                                                             aria-label="Buka bukti pembayaran {{ $payment->name }}">
+
                                                             <img class="proof-image"
                                                                 src="{{ route('admin.payment.proof', $payment) }}"
                                                                 alt="Bukti pembayaran {{ $payment->name }}">
+
                                                         </a>
+
                                                     </td>
+
                                                     <td class="payment-actions">
+
                                                         @if ($payment->payment_status === 'submitted')
+
                                                             <form
                                                                 action="{{ route('admin.payment.verify', $payment) }}"
                                                                 method="POST"
                                                                 onsubmit="return confirmVerification(event, this)">
+
                                                                 @csrf
-                                                                <input class="note-input" type="text"
-                                                                    name="note" maxlength="1000"
+
+                                                                <input class="note-input"
+                                                                    type="text"
+                                                                    name="note"
+                                                                    maxlength="1000"
                                                                     placeholder="Alasan penolakan (wajib jika menolak)"
                                                                     aria-label="Alasan penolakan untuk {{ $payment->name }}">
+
                                                                 <div style="display:flex; gap:7px;">
-                                                                    <button class="button small" type="submit"
-                                                                        name="status" value="approved">
+
+                                                                    <button class="button small"
+                                                                        type="submit"
+                                                                        name="status"
+                                                                        value="approved">
+
                                                                         Verifikasi
+
                                                                     </button>
-                                                                    <button class="button danger small" type="submit"
-                                                                        name="status" value="rejected">
+
+                                                                    <button class="button danger small"
+                                                                        type="submit"
+                                                                        name="status"
+                                                                        value="rejected">
+
                                                                         Tolak
+
                                                                     </button>
+
                                                                 </div>
+
                                                             </form>
+
                                                         @else
-                                                            <span class="muted">Sudah diproses</span>
+
+                                                            <span class="muted">
+                                                                Sudah diproses
+                                                            </span>
+
                                                         @endif
+
                                                     </td>
+
                                                 </tr>
+
                                             @endforeach
+
                                         </tbody>
+
                                     </table>
+
                                 </div>
+
                             @endif
+
                         </div>
+
+
+                        {{-- ================= TAGIHAN PENGHUNI ================= --}}
+
+                        <div class="panel" style="margin-top:16px;">
+
+                            <div class="panel-body" style="border-bottom:1px solid var(--line);">
+
+                                <div style="display:flex; align-items:center; justify-content:space-between; gap:15px; flex-wrap:wrap;">
+
+                                    <div>
+
+                                        <h3 style="margin:0; font-size:14px;">
+                                            Tagihan Penghuni
+                                        </h3>
+
+                                        <p style="margin:5px 0 0; color:var(--muted); font-size:11px;">
+                                            Daftar tagihan sewa yang dibuat untuk penghuni.
+                                        </p>
+
+                                    </div>
+
+                                    <span class="badge neutral">
+                                        {{ $tagihans->count() }} tagihan
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            @if ($tagihans->isEmpty())
+
+                                <div class="empty-state">
+
+                                    <strong>
+                                        Belum ada tagihan.
+                                    </strong>
+
+                                    Tagihan penghuni yang sudah dibuat akan muncul di sini.
+
+                                </div>
+
+                            @else
+
+                                <div class="table-wrap">
+
+                                    <table>
+
+                                        <thead>
+
+                                            <tr>
+                                                <th>Penghuni</th>
+                                                <th>Kamar</th>
+                                                <th>Periode</th>
+                                                <th>Nominal</th>
+                                                <th>Jatuh Tempo</th>
+                                                <th>Status</th>
+                                                <th>Bukti</th>
+                                                <th>Aksi</th>
+                                            </tr>
+
+                                        </thead>
+
+
+                                        <tbody>
+
+                                            @foreach ($tagihans as $tagihan)
+
+                                                <tr>
+
+                                                    {{-- PENGHUNI --}}
+                                                    <td>
+
+                                                        <strong>
+                                                            {{ $tagihan->user?->name ?? 'Pengguna tidak tersedia' }}
+                                                        </strong>
+
+                                                        <br>
+
+                                                        <span class="muted">
+                                                            {{ $tagihan->user?->email ?? '—' }}
+                                                        </span>
+
+                                                    </td>
+
+
+                                                    {{-- KAMAR --}}
+                                                    <td>
+
+                                                        <strong>
+                                                            {{ $tagihan->room?->kode_kamar ?? '—' }}
+                                                        </strong>
+
+                                                        @if ($tagihan->room?->nama)
+
+                                                            <br>
+
+                                                            <span class="muted">
+                                                                {{ $tagihan->room->nama }}
+                                                            </span>
+
+                                                        @endif
+
+                                                    </td>
+
+
+                                                    {{-- PERIODE --}}
+                                                    <td>
+                                                        {{ $tagihan->periode }}
+                                                    </td>
+
+
+                                                    {{-- NOMINAL --}}
+                                                    <td>
+
+                                                        <strong>
+                                                            Rp {{ number_format($tagihan->nominal, 0, ',', '.') }}
+                                                        </strong>
+
+                                                    </td>
+
+
+                                                    {{-- JATUH TEMPO --}}
+                                                    <td>
+                                                        {{ $tagihan->jatuh_tempo?->format('d M Y') ?? '—' }}
+                                                    </td>
+
+
+                                                    {{-- STATUS --}}
+                                                    <td>
+
+                                                        @if ($tagihan->status === 'lunas')
+
+                                                            <span class="badge approved">
+                                                                Lunas
+                                                            </span>
+
+                                                        @elseif ($tagihan->status === 'menunggu_verifikasi')
+
+                                                            <span class="badge waiting">
+                                                                Menunggu verifikasi
+                                                            </span>
+
+                                                        @elseif ($tagihan->status === 'ditolak')
+
+                                                            <span class="badge rejected">
+                                                                Ditolak
+                                                            </span>
+
+                                                        @else
+
+                                                            <span class="badge neutral">
+                                                                Belum bayar
+                                                            </span>
+
+                                                        @endif
+
+                                                    </td>
+
+
+                                                    {{-- BUKTI --}}
+                                                    <td>
+
+                                                        @if ($tagihan->bukti_pembayaran)
+
+                                                            <a
+                                                                class="button secondary small"
+                                                                href="{{ route('admin.tagihan.proof', $tagihan) }}"
+                                                                target="_blank"
+                                                                rel="noopener">
+
+                                                                Lihat Bukti
+
+                                                            </a>
+
+                                                        @else
+
+                                                            <span class="muted">
+                                                                Belum ada
+                                                            </span>
+
+                                                        @endif
+
+                                                    </td>
+
+
+                                                    {{-- AKSI --}}
+                                                    <td>
+
+                                                        @if ($tagihan->status === 'menunggu_verifikasi')
+
+                                                            <form
+                                                                action="{{ route('admin.tagihan.verify', $tagihan) }}"
+                                                                method="POST"
+                                                                style="display:grid; gap:7px; min-width:190px;">
+
+                                                                @csrf
+
+                                                                <input
+                                                                    class="note-input"
+                                                                    type="text"
+                                                                    name="catatan"
+                                                                    maxlength="1000"
+                                                                    placeholder="Alasan jika ditolak">
+
+                                                                <div style="display:flex; gap:7px;">
+
+                                                                    <button
+                                                                        class="button small"
+                                                                        type="submit"
+                                                                        name="status"
+                                                                        value="lunas"
+                                                                        onclick="return confirm('Verifikasi pembayaran tagihan ini?')">
+
+                                                                        Verifikasi
+
+                                                                    </button>
+
+
+                                                                    <button
+                                                                        class="button danger small"
+                                                                        type="submit"
+                                                                        name="status"
+                                                                        value="ditolak"
+                                                                        onclick="return confirm('Tolak pembayaran tagihan ini?')">
+
+                                                                        Tolak
+
+                                                                    </button>
+
+                                                                </div>
+
+                                                            </form>
+
+                                                        @elseif ($tagihan->status === 'lunas')
+
+                                                            <span class="muted">
+                                                                Sudah lunas
+                                                            </span>
+
+                                                        @elseif ($tagihan->status === 'ditolak')
+
+                                                            <span class="muted">
+                                                                Ditolak
+                                                            </span>
+
+                                                        @else
+
+                                                            <span class="muted">
+                                                                Belum ada pembayaran
+                                                            </span>
+
+                                                        @endif
+
+                                                    </td>
+
+                                                </tr>
+
+                                            @endforeach
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+
+                            @endif
+
+                        </div>
+
+
                         <p class="notice">
-                            Data pembayaran proyek saat ini disimpan sebagai status dan bukti terkini di akun pengguna,
-                            bukan sebagai transaksi berulang. Nominal, metode, periode, dan tanggal pembayaran belum
-                            tersedia.
+
+                            Pembayaran awal dan tagihan sewa merupakan dua data yang berbeda.
+                            Pembayaran awal tetap menggunakan sistem verifikasi bukti pembayaran,
+                            sedangkan tagihan digunakan untuk mencatat pembayaran sewa penghuni.
+
                         </p>
+
                     </section>
 
+
+                    {{-- ==================== DATA KAMAR ADMIN ==================== --}}
+
                     <section class="section" id="rooms">
+
                         <div class="section-heading">
+
                             <div>
+
                                 <h2>Data kamar</h2>
-                                <p>Informasi kamar yang tersimpan di database Kost Athia.</p>
+
+                                <p>
+                                    Informasi kamar yang tersimpan di database Kost Athia.
+                                </p>
+
                             </div>
+
                             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                                <a class="button secondary" href="{{ route('admin.rooms.index') }}">Kelola Data
-                                    Kamar</a>
-                                <a class="button" href="{{ route('admin.rooms.create') }}">+ Tambah Kamar</a>
+
+                                <a class="button secondary"
+                                    href="{{ route('admin.rooms.index') }}">
+                                    Kelola Data Kamar
+                                </a>
+
+                                <a class="button"
+                                    href="{{ route('admin.rooms.create') }}">
+                                    + Tambah Kamar
+                                </a>
+
                             </div>
+
                         </div>
+
                         <div class="panel">
+
                             @if ($rooms->isEmpty())
+
                                 <div class="empty-state">
-                                    <strong>Belum ada data kamar.</strong>
+
+                                    <strong>
+                                        Belum ada data kamar.
+                                    </strong>
+
                                     Kamar akan tampil setelah tersedia di database.
+
                                 </div>
+
                             @else
+
                                 <div class="table-wrap">
+
                                     <table>
+
                                         <thead>
+
                                             <tr>
                                                 <th>Kode</th>
                                                 <th>Nama Kamar</th>
@@ -1004,237 +1577,629 @@
                                                 <th>Status</th>
                                                 <th>Aksi</th>
                                             </tr>
+
                                         </thead>
+
                                         <tbody>
+
                                             @foreach ($rooms as $room)
+
                                                 <tr>
-                                                    <td><strong>{{ $room->kode_kamar }}</strong></td>
-                                                    <td>{{ $room->nama }}</td>
-                                                    <td>{{ $room->lokasi }}</td>
-                                                    <td>Rp {{ number_format($room->harga, 0, ',', '.') }}</td>
+
                                                     <td>
-                                                        <span
-                                                            class="badge {{ $room->status === 'tersedia' ? 'available' : ($room->status === 'terisi' ? 'occupied' : 'neutral') }}">
+                                                        <strong>
+                                                            {{ $room->kode_kamar }}
+                                                        </strong>
+                                                    </td>
+
+                                                    <td>
+                                                        {{ $room->nama }}
+                                                    </td>
+
+                                                    <td>
+                                                        {{ $room->lokasi }}
+                                                    </td>
+
+                                                    <td>
+                                                        Rp {{ number_format($room->harga, 0, ',', '.') }}
+                                                    </td>
+
+                                                    <td>
+
+                                                        <span class="badge
+                                                            {{ $room->status === 'tersedia'
+                                                                ? 'available'
+                                                                : ($room->status === 'terisi'
+                                                                    ? 'occupied'
+                                                                    : 'neutral') }}">
+
                                                             {{ $roomStatusLabels[$room->status] ?? ucfirst($room->status) }}
+
                                                         </span>
+
                                                     </td>
-                                                    <td><a class="button secondary small"
-                                                            href="{{ route('admin.rooms.edit', $room) }}">Edit</a>
+
+                                                    <td>
+
+                                                        <a class="button secondary small"
+                                                            href="{{ route('admin.rooms.edit', $room) }}">
+                                                            Edit
+                                                        </a>
+
                                                     </td>
+
                                                 </tr>
+
                                             @endforeach
+
                                         </tbody>
+
                                     </table>
+
                                 </div>
+
                             @endif
+
                         </div>
+
                     </section>
 
+
+                    {{-- ==================== DATA PENGHUNI ADMIN ==================== --}}
+
                     <section class="section" id="residents">
+
                         <div class="section-heading">
+
                             <div>
+
                                 <h2>Data penghuni</h2>
-                                <p>Akun dengan role user; status pembayaran ditampilkan sebagai status verifikasi yang
-                                    tersedia.</p>
+
+                                <p>
+                                    Akun dengan role user; status pembayaran ditampilkan sebagai status verifikasi yang tersedia.
+                                </p>
+
                             </div>
+
                         </div>
+
                         <div class="panel">
+
                             @if ($residents->isEmpty())
-                                <div class="empty-state"><strong>Belum ada akun penghuni.</strong>Akun pengguna akan
-                                    muncul di sini.</div>
+
+                                <div class="empty-state">
+
+                                    <strong>
+                                        Belum ada akun penghuni.
+                                    </strong>
+
+                                    Akun pengguna akan muncul di sini.
+
+                                </div>
+
                             @else
+
                                 <div class="table-wrap">
+
                                     <table>
+
                                         <thead>
+
                                             <tr>
                                                 <th>Nama</th>
                                                 <th>Email</th>
                                                 <th>Status pembayaran</th>
                                             </tr>
+
                                         </thead>
+
                                         <tbody>
+
                                             @foreach ($residents as $resident)
+
                                                 <tr>
-                                                    <td><strong>{{ $resident->name }}</strong></td>
-                                                    <td>{{ $resident->email }}</td>
+
                                                     <td>
-                                                        <span
-                                                            class="badge {{ $statusClasses[$resident->payment_status] ?? 'neutral' }}">
-                                                            {{ $statusLabels[$resident->payment_status] ?? ucfirst($resident->payment_status) }}
-                                                        </span>
+                                                        <strong>
+                                                            {{ $resident->name }}
+                                                        </strong>
                                                     </td>
+
+                                                    <td>
+                                                        {{ $resident->email }}
+                                                    </td>
+
+                                                    <td>
+
+                                                        <span class="badge {{ $statusClasses[$resident->payment_status] ?? 'neutral' }}">
+
+                                                            {{ $statusLabels[$resident->payment_status] ?? ucfirst($resident->payment_status) }}
+
+                                                        </span>
+
+                                                    </td>
+
                                                 </tr>
+
                                             @endforeach
+
                                         </tbody>
+
                                     </table>
+
                                 </div>
+
                             @endif
+
                         </div>
+
                     </section>
 
+
+                    {{-- ==================== BOOKING ADMIN ==================== --}}
+
                     <section class="section" id="bookings">
+
                         <div class="section-heading">
+
                             <div>
+
                                 <h2>Booking terbaru</h2>
-                                <p>Data booking yang tersimpan pada tabel bookings.</p>
+
+                                <p>
+                                    Data booking yang tersimpan pada tabel bookings.
+                                </p>
+
                             </div>
+
                         </div>
+
                         <div class="panel">
+
                             @if ($bookings->isEmpty())
+
                                 <div class="empty-state">
-                                    <strong>Belum ada data booking.</strong>
+
+                                    <strong>
+                                        Belum ada data booking.
+                                    </strong>
+
                                     Tabel booking tersedia, tetapi alur pemesanan saat ini belum menyimpan booking ke
                                     tabel tersebut.
+
                                 </div>
+
                             @else
+
                                 <div class="table-wrap">
+
                                     <table>
+
                                         <thead>
+
                                             <tr>
                                                 <th>Penghuni</th>
                                                 <th>Kamar</th>
                                                 <th>Tanggal booking</th>
                                                 <th>Status</th>
                                             </tr>
+
                                         </thead>
+
                                         <tbody>
+
                                             @foreach ($bookings as $booking)
+
                                                 <tr>
+
                                                     <td>
-                                                        <strong>{{ $booking->user?->name ?? 'Pengguna tidak tersedia' }}</strong><br>
-                                                        <span class="muted">{{ $booking->user?->email }}</span>
+
+                                                        <strong>
+                                                            {{ $booking->user?->name ?? 'Pengguna tidak tersedia' }}
+                                                        </strong>
+
+                                                        <br>
+
+                                                        <span class="muted">
+                                                            {{ $booking->user?->email }}
+                                                        </span>
+
                                                     </td>
-                                                    <td>{{ $booking->room?->kode_kamar ?? 'Kamar tidak tersedia' }}{{ $booking->room ? ' · ' . $booking->room->nama : '' }}
+
+                                                    <td>
+
+                                                        {{ $booking->room?->kode_kamar ?? 'Kamar tidak tersedia' }}
+
+                                                        {{ $booking->room ? ' · ' . $booking->room->nama : '' }}
+
                                                     </td>
-                                                    <td>{{ $booking->created_at?->format('d M Y') ?? '—' }}</td>
-                                                    <td><span
-                                                            class="badge neutral">{{ ucfirst($booking->status) }}</span>
+
+                                                    <td>
+                                                        {{ $booking->created_at?->format('d M Y') ?? '—' }}
                                                     </td>
+
+                                                    <td>
+
+                                                        <span class="badge neutral">
+                                                            {{ ucfirst($booking->status) }}
+                                                        </span>
+
+                                                    </td>
+
                                                 </tr>
+
                                             @endforeach
+
                                         </tbody>
+
                                     </table>
+
                                 </div>
+
                             @endif
+
                         </div>
+
                     </section>
+
+
                 @else
+
+                    {{-- ========================================================= --}}
+                    {{-- ====================== PENGHUNI ======================== --}}
+                    {{-- ========================================================= --}}
+
                     @php
                         $paymentStatus = $currentUser->payment_status;
-                        $paymentStatusLabel = $statusLabels[$paymentStatus] ?? ucfirst($paymentStatus);
-                        $paymentStatusClass = $statusClasses[$paymentStatus] ?? 'neutral';
+
+                        $paymentStatusLabel =
+                            $statusLabels[$paymentStatus] ?? ucfirst($paymentStatus);
+
+                        $paymentStatusClass =
+                            $statusClasses[$paymentStatus] ?? 'neutral';
                     @endphp
 
-                    <section class="info-grid" aria-label="Ringkasan penghuni">
-                        <article class="info-card" id="my-payment">
-                            <h3>Status pembayaran</h3>
-                            <span class="badge {{ $paymentStatusClass }}">{{ $paymentStatusLabel }}</span>
-                            @if ($currentUser->payment_status === 'rejected' && $currentUser->payment_note)
-                                <div class="notice warning"><strong>Alasan penolakan:</strong>
-                                    {{ $currentUser->payment_note }}</div>
-                            @elseif ($currentUser->payment_status === 'submitted')
-                                <div class="notice">Bukti Anda sudah diterima dan sedang menunggu verifikasi admin.
-                                </div>
-                            @elseif ($currentUser->payment_status === 'approved')
-                                <div class="notice">Pembayaran Anda telah disetujui oleh admin.</div>
-                            @else
-                                <div class="notice warning">Belum ada bukti pembayaran yang dikirim untuk akun ini.
-                                </div>
-                            @endif
-                            @if (!in_array($currentUser->payment_status, ['submitted', 'approved'], true))
-                                <a class="button" href="{{ route('payment.show') }}" style="margin-top:14px;">
-                                    {{ $currentUser->payment_status === 'rejected' ? 'Unggah ulang bukti pembayaran' : 'Unggah bukti pembayaran' }}
-                                </a>
-                            @endif
-                        </article>
 
-                        <article class="info-card">
-                            <h3>Ringkasan akun</h3>
-                            <dl class="detail-list">
-                                <div class="detail-row">
-                                    <dt>Nama</dt>
-                                    <dd>{{ $currentUser->name }}</dd>
-                                </div>
-                                <div class="detail-row">
-                                    <dt>Email</dt>
-                                    <dd>{{ $currentUser->email }}</dd>
-                                </div>
-                                <div class="detail-row">
-                                    <dt>Status akun</dt>
-                                    <dd>Penghuni</dd>
-                                </div>
-                            </dl>
-                        </article>
-                    </section>
+                    {{-- ==================== KAMAR SAYA ==================== --}}
 
                     <section class="section" id="my-rooms">
+
                         <div class="section-heading">
+
                             <div>
-                                <h2>Kamar saya</h2>
-                                <p>Informasi kamar dari booking yang terhubung ke akun Anda.</p>
+
+                                <h2>Kamar Saya</h2>
+
+                                <p>
+                                    Detail kamar yang sedang digunakan oleh Anda.
+                                </p>
+
                             </div>
-                            <a class="button secondary" href="{{ route('kamar') }}">Jelajahi kamar</a>
+
+                            <a class="button secondary"
+                                href="{{ route('kamar') }}">
+                                Jelajahi Kamar
+                            </a>
+
                         </div>
+
                         <div class="panel">
+
                             @if ($bookings->isEmpty())
+
                                 <div class="empty-state">
-                                    <strong>Belum ada kamar yang terhubung.</strong>
-                                    Data booking belum tercatat untuk akun ini. Informasi tanggal mulai sewa dan
-                                    fasilitas juga belum tersedia di database.
-                                    <br><a class="button" href="{{ route('kamar') }}">Lihat kamar</a>
+
+                                    <strong>
+                                        Belum ada kamar yang terhubung.
+                                    </strong>
+
+                                    Data booking belum tercatat untuk akun ini.
+
+                                    <br>
+
+                                    <a class="button"
+                                        href="{{ route('kamar') }}">
+                                        Lihat Kamar
+                                    </a>
+
                                 </div>
+
                             @else
+
                                 <div class="info-grid panel-body">
+
                                     @foreach ($bookings as $booking)
+
                                         <article class="info-card">
-                                            <h3>{{ $booking->room?->nama ?? 'Kamar tidak tersedia' }}</h3>
+
+                                            <h3>
+                                                {{ $booking->room?->nama ?? 'Kamar tidak tersedia' }}
+                                            </h3>
+
                                             <dl class="detail-list">
+
                                                 <div class="detail-row">
                                                     <dt>Nomor kamar</dt>
-                                                    <dd>{{ $booking->room?->kode_kamar ?? '—' }}</dd>
+
+                                                    <dd>
+                                                        {{ $booking->room?->kode_kamar ?? '—' }}
+                                                    </dd>
                                                 </div>
+
                                                 <div class="detail-row">
                                                     <dt>Lokasi</dt>
-                                                    <dd>{{ $booking->room?->lokasi ?? '—' }}</dd>
+
+                                                    <dd>
+                                                        {{ $booking->room?->lokasi ?? '—' }}
+                                                    </dd>
                                                 </div>
+
                                                 <div class="detail-row">
                                                     <dt>Harga sewa</dt>
-                                                    <dd>{{ $booking->room ? 'Rp ' . number_format($booking->room->harga, 0, ',', '.') : '—' }}
+
+                                                    <dd>
+                                                        {{ $booking->room
+                                                            ? 'Rp ' . number_format($booking->room->harga, 0, ',', '.')
+                                                            : '—' }}
                                                     </dd>
                                                 </div>
+
                                                 <div class="detail-row">
                                                     <dt>Status kamar</dt>
-                                                    <dd>{{ $booking->room ? ucfirst($booking->room->status) : '—' }}
+
+                                                    <dd>
+                                                        {{ $booking->room
+                                                            ? ucfirst($booking->room->status)
+                                                            : '—' }}
                                                     </dd>
                                                 </div>
+
                                                 <div class="detail-row">
                                                     <dt>Status booking</dt>
-                                                    <dd>{{ ucfirst($booking->status) }}</dd>
+
+                                                    <dd>
+                                                        {{ ucfirst($booking->status) }}
+                                                    </dd>
                                                 </div>
+
                                                 <div class="detail-row">
                                                     <dt>Tanggal booking</dt>
-                                                    <dd>{{ $booking->created_at?->format('d M Y') ?? '—' }}</dd>
+
+                                                    <dd>
+                                                        {{ $booking->created_at?->format('d M Y') ?? '—' }}
+                                                    </dd>
                                                 </div>
+
                                             </dl>
+
                                         </article>
+
                                     @endforeach
+
                                 </div>
+
                             @endif
+
                         </div>
+
                     </section>
 
-                    <section class="section" id="history">
+
+                    {{-- ==================== PEMBAYARAN PENGHUNI ==================== --}}
+
+                    <section class="section" id="my-payment">
+
                         <div class="section-heading">
+
                             <div>
-                                <h2>Riwayat pembayaran</h2>
-                                <p>Informasi status bukti pembayaran yang tersimpan pada akun Anda.</p>
+
+                                <h2>Pembayaran</h2>
+
+                                <p>
+                                    Tagihan sewa kamar Anda.
+                                </p>
+
                             </div>
+
                         </div>
+
                         <div class="panel">
+
+                            @if ($tagihans->isEmpty())
+
+                                <div class="empty-state">
+
+                                    <strong>
+                                        Belum ada tagihan.
+                                    </strong>
+
+                                    Saat ini belum ada tagihan yang harus dibayar.
+
+                                </div>
+
+                            @else
+
+                                @php
+                                    $tagihanAktif = $tagihans->first();
+                                @endphp
+
+                                <div class="panel-body">
+
+                                    <article class="info-card">
+
+                                        <h3>
+                                            Tagihan Anda
+                                        </h3>
+
+                                        <dl class="detail-list">
+
+                                            <div class="detail-row">
+                                                <dt>Jenis pembayaran</dt>
+
+                                                <dd>
+                                                    {{ $tagihanAktif->jenis_pembayaran }}
+                                                </dd>
+                                            </div>
+
+                                            <div class="detail-row">
+                                                <dt>Kamar</dt>
+
+                                                <dd>
+
+                                                    {{ $tagihanAktif->room?->kode_kamar ?? '—' }}
+
+                                                    @if ($tagihanAktif->room?->nama)
+                                                        - {{ $tagihanAktif->room->nama }}
+                                                    @endif
+
+                                                </dd>
+
+                                            </div>
+
+                                            <div class="detail-row">
+                                                <dt>Periode</dt>
+
+                                                <dd>
+                                                    {{ $tagihanAktif->periode }}
+                                                </dd>
+                                            </div>
+
+                                            <div class="detail-row">
+                                                <dt>Nominal</dt>
+
+                                                <dd>
+                                                    Rp {{ number_format($tagihanAktif->nominal, 0, ',', '.') }}
+                                                </dd>
+                                            </div>
+
+                                            <div class="detail-row">
+                                                <dt>Jatuh tempo</dt>
+
+                                                <dd>
+                                                    {{ $tagihanAktif->jatuh_tempo?->format('d M Y') ?? '—' }}
+                                                </dd>
+
+                                            </div>
+
+                                            <div class="detail-row">
+                                                <dt>Status</dt>
+
+                                                <dd>
+
+                                                    @if ($tagihanAktif->status === 'lunas')
+
+                                                        <span class="badge approved">
+                                                            Lunas
+                                                        </span>
+
+                                                    @elseif ($tagihanAktif->status === 'menunggu_verifikasi')
+
+                                                        <span class="badge waiting">
+                                                            Menunggu verifikasi
+                                                        </span>
+
+                                                    @elseif ($tagihanAktif->status === 'ditolak')
+
+                                                        <span class="badge rejected">
+                                                            Ditolak
+                                                        </span>
+
+                                                    @else
+
+                                                        <span class="badge neutral">
+                                                            Belum bayar
+                                                        </span>
+
+                                                    @endif
+
+                                                </dd>
+
+                                            </div>
+
+                                        </dl>
+
+
+                                        @if ($tagihanAktif->status === 'ditolak' && $tagihanAktif->catatan)
+
+                                            <div class="notice warning">
+
+                                                <strong>
+                                                    Catatan admin:
+                                                </strong>
+
+                                                {{ $tagihanAktif->catatan }}
+
+                                            </div>
+
+                                        @elseif ($tagihanAktif->status === 'menunggu_verifikasi')
+
+                                            <div class="notice">
+
+                                                Bukti pembayaran sudah dikirim dan sedang menunggu verifikasi admin.
+
+                                            </div>
+
+                                        @elseif ($tagihanAktif->status === 'lunas')
+
+                                            <div class="notice">
+
+                                                Tagihan ini sudah lunas.
+
+                                            </div>
+
+                                        @endif
+
+
+                                        @if (in_array($tagihanAktif->status, ['belum_bayar', 'ditolak'], true))
+
+                                            <a href="{{ route('tagihan.show', $tagihanAktif->id) }}"
+                                                class="button">
+
+                                                Bayar Sekarang
+
+                                            </a>
+
+                                        @endif
+
+                                    </article>
+
+                                </div>
+
+                            @endif
+
+                        </div>
+
+                    </section>
+
+
+                    {{-- ==================== RIWAYAT PEMBAYARAN ==================== --}}
+
+                    <section class="section" id="history">
+
+                        <div class="section-heading">
+
+                            <div>
+
+                                <h2>Riwayat Pembayaran</h2>
+
+                                <p>
+                                    Informasi pembayaran yang tersimpan pada akun Anda.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <div class="panel">
+
                             @if ($currentUser->payment_proof)
+
                                 <div class="table-wrap">
+
                                     <table>
+
                                         <thead>
+
                                             <tr>
                                                 <th>No.</th>
                                                 <th>Jenis / periode</th>
@@ -1243,100 +2208,218 @@
                                                 <th>Status</th>
                                                 <th>Pembaruan data</th>
                                             </tr>
+
                                         </thead>
+
                                         <tbody>
+
                                             <tr>
-                                                <td>1</td>
+
                                                 <td>
-                                                    Tidak dicatat<br>
-                                                    <span class="muted">Periode tidak tersedia</span>
+                                                    1
                                                 </td>
-                                                <td>Tidak dicatat</td>
-                                                <td>Tidak tersedia</td>
-                                                <td><span
-                                                        class="badge {{ $paymentStatusClass }}">{{ $paymentStatusLabel }}</span>
+
+                                                <td>
+
+                                                    Tidak dicatat
+
+                                                    <br>
+
+                                                    <span class="muted">
+                                                        Periode tidak tersedia
+                                                    </span>
+
                                                 </td>
-                                                <td>{{ $currentUser->updated_at?->format('d M Y, H:i') ?? '—' }}</td>
+
+                                                <td>
+                                                    Tidak dicatat
+                                                </td>
+
+                                                <td>
+                                                    Tidak tersedia
+                                                </td>
+
+                                                <td>
+
+                                                    <span class="badge {{ $paymentStatusClass }}">
+                                                        {{ $paymentStatusLabel }}
+                                                    </span>
+
+                                                </td>
+
+                                                <td>
+                                                    {{ $currentUser->updated_at?->format('d M Y, H:i') ?? '—' }}
+                                                </td>
+
                                             </tr>
+
                                         </tbody>
+
                                     </table>
+
                                 </div>
+
                                 <p class="notice" style="margin: 14px;">
-                                    Skema saat ini hanya menyimpan satu status dan bukti terkini pada akun pengguna,
-                                    bukan histori transaksi.
-                                    Tanggal di atas adalah waktu pembaruan data akun, bukan tanggal pembayaran.
+
+                                    Skema saat ini hanya menyimpan satu status dan bukti terkini
+                                    pada akun pengguna, bukan histori transaksi.
+
                                 </p>
+
                             @else
+
                                 <div class="empty-state">
-                                    <strong>Belum ada pembayaran untuk ditampilkan.</strong>
-                                    Setelah Anda mengirim bukti, status terakhir akan tampil di sini. Sistem belum
-                                    menyimpan histori transaksi terpisah.
+
+                                    <strong>
+                                        Belum ada pembayaran untuk ditampilkan.
+                                    </strong>
+
+                                    Setelah Anda mengirim bukti, status pembayaran akan tampil di sini.
+
                                     @if ($currentUser->payment_status !== 'approved')
-                                        <br><a class="button" href="{{ route('payment.show') }}">Unggah bukti
-                                            pembayaran</a>
+
+                                        <br>
+
+                                        <a class="button"
+                                            href="{{ route('payment.show') }}">
+
+                                            Unggah bukti pembayaran
+
+                                        </a>
+
                                     @endif
+
                                 </div>
+
                             @endif
+
                         </div>
+
                     </section>
+
+
+                    {{-- ==================== PROFIL ==================== --}}
 
                     <section class="section" id="profile">
+
                         <div class="section-heading">
+
                             <div>
-                                <h2>Profil saya</h2>
-                                <p>Informasi akun yang sedang digunakan.</p>
+
+                                <h2>Profil Saya</h2>
+
+                                <p>
+                                    Informasi akun yang sedang digunakan.
+                                </p>
+
                             </div>
+
                         </div>
+
                         <div class="panel panel-body">
+
                             <div class="profile-card">
+
                                 <div class="avatar" aria-hidden="true">
-                                    {{ mb_strtoupper(mb_substr($currentUser->name, 0, 1)) }}</div>
-                                <div>
-                                    <strong>{{ $currentUser->name }}</strong>
-                                    <span>{{ $currentUser->email }}</span>
+
+                                    {{ mb_strtoupper(mb_substr($currentUser->name, 0, 1)) }}
+
                                 </div>
+
+                                <div>
+
+                                    <strong>
+                                        {{ $currentUser->name }}
+                                    </strong>
+
+                                    <span>
+                                        {{ $currentUser->email }}
+                                    </span>
+
+                                </div>
+
                             </div>
-                            <p class="notice">Fitur ubah profil belum tersedia pada proyek saat ini.</p>
+
+                            <p class="notice">
+
+                                Fitur ubah profil belum tersedia pada proyek saat ini.
+
+                            </p>
+
                         </div>
+
                     </section>
+
                 @endif
+
             </div>
+
         </main>
+
     </div>
 
+
     <script>
+
         function confirmVerification(event, form) {
-            const status = event.submitter ? event.submitter.value : '';
+
+            const status = event.submitter
+                ? event.submitter.value
+                : '';
+
             const note = form.querySelector('[name="note"]');
 
             if (status === 'rejected' && !note.value.trim()) {
+
                 event.preventDefault();
-                window.alert('Alasan penolakan wajib diisi.');
+
+                window.alert(
+                    'Alasan penolakan wajib diisi.'
+                );
+
                 note.focus();
+
                 return false;
             }
 
-            const message = status === 'approved' ?
-                'Verifikasi pembayaran ini? Status yang sudah diproses tidak dapat diverifikasi ulang.' :
-                'Tolak bukti pembayaran ini dengan alasan yang telah diisi?';
+            const message =
+                status === 'approved'
+                    ? 'Verifikasi pembayaran ini? Status yang sudah diproses tidak dapat diverifikasi ulang.'
+                    : 'Tolak bukti pembayaran ini dengan alasan yang telah diisi?';
 
             if (!window.confirm(message)) {
+
                 event.preventDefault();
+
                 return false;
             }
 
             return true;
         }
 
-        document.querySelectorAll('.nav-link[href^="#"]').forEach((link) => {
-            link.addEventListener('click', () => {
-                document.querySelectorAll('.nav-link.active').forEach((activeLink) => {
-                    activeLink.classList.remove('active');
+
+        document
+            .querySelectorAll('.nav-link[href^="#"]')
+            .forEach((link) => {
+
+                link.addEventListener('click', () => {
+
+                    document
+                        .querySelectorAll('.nav-link.active')
+                        .forEach((activeLink) => {
+
+                            activeLink.classList.remove('active');
+
+                        });
+
+                    link.classList.add('active');
+
                 });
-                link.classList.add('active');
+
             });
-        });
+
     </script>
+
 </body>
 
 </html>

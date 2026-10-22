@@ -52,4 +52,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Booking::class);
     }
+
+    public function tagihans(): HasMany
+    {
+        return $this->hasMany(Tagihan::class);
+    }
 }

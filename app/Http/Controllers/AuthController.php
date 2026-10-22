@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
+use App\Models\Tagihan;
 
 class AuthController extends Controller
 {
@@ -110,12 +111,17 @@ class AuthController extends Controller
                     ->latest('updated_at')
                     ->take(10)
                     ->get(),
+
                 'residents' => User::query()
                     ->where('role', 'user')
                     ->latest()
                     ->take(10)
                     ->get(),
-                'rooms' => Room::query()->orderBy('kode_kamar')->get(),
+
+                'rooms' => Room::query()
+                    ->orderBy('kode_kamar')
+                    ->get(),
+
                 'bookings' => Booking::query()
                     ->with([
                         'user:id,name,email',
@@ -124,13 +130,25 @@ class AuthController extends Controller
                     ->latest()
                     ->take(10)
                     ->get(),
+
+                'tagihans' => Tagihan::query()
+                    ->with(['user', 'room'])
+                    ->latest()
+                    ->take(10)
+                    ->get(),
+
                 'stats' => [
                     'rooms' => Room::query()->count(),
-                    'availableRooms' => Room::query()->where('status', 'tersedia')->count(),
+
+                    'availableRooms' => Room::query()
+                        ->where('status', 'tersedia')
+                        ->count(),
+
                     'residents' => User::query()
                         ->where('role', 'user')
                         ->where('payment_status', 'approved')
                         ->count(),
+
                     'pendingPayments' => User::query()
                         ->where('role', 'user')
                         ->where('payment_status', 'submitted')
@@ -141,15 +159,26 @@ class AuthController extends Controller
 
         abort_unless($user->role === 'user', 403);
 
+        // PEMBAYARAN AWAL TETAP SEPERTI SEBELUMNYA
         if ($user->payment_status !== 'approved') {
             return redirect()
                 ->route('payment.show')
-                ->with('info', 'Dashboard dapat diakses setelah admin memverifikasi pembayaran Anda.');
+                ->with(
+                    'info',
+                    'Dashboard dapat diakses setelah admin memverifikasi pembayaran Anda.'
+                );
         }
 
         return view('dashboard', [
             'bookings' => $user->bookings()
                 ->with('room')
+                ->latest()
+                ->get(),
+
+            // TAGIHAN HANYA MILIK USER YANG SEDANG LOGIN
+            'tagihans' => Tagihan::query()
+                ->with('room')
+                ->where('user_id', $user->id)
                 ->latest()
                 ->get(),
         ]);
