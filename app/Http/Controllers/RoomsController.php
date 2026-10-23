@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Room;
+use App\Models\Booking;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class RoomsController extends Controller
@@ -77,55 +80,81 @@ class RoomsController extends Controller
      * Booking kamar.
      */
     public function booking($id)
-    {
-        $kamar = Room::findOrFail($id);
+{
+    $kamar = Room::findOrFail($id);
 
-        if ($kamar->status !== 'tersedia') {
-            return redirect()
-                ->route('kamar')
-                ->with('error', 'Kamar ini sudah terisi.');
-        }
-
-        session(['booking_room_id' => $kamar->id]);
-
-        if (!auth()->check()) {
-            return redirect()
-                ->route('register')
-                ->with('success', 'Silakan registrasi untuk melanjutkan booking.');
-        }
-
-        return redirect()->route('payment.show');
+    if ($kamar->status !== 'tersedia') {
+        return redirect()
+            ->route('kamar')
+            ->with('error', 'Kamar ini sudah terisi.');
     }
 
-    /**
-     * Booking kamar VIP.
-     */
-    public function bookingVip()
-    {
-        $kamar = Room::query()
-            ->where('kode_kamar', 'VIP')
+    session(['booking_room_id' => $kamar->id]);
+
+    if (!auth()->check()) {
+        return redirect()
+            ->route('register')
+            ->with('success', 'Silakan registrasi untuk melanjutkan booking.');
+    }
+
+    // Jika user sudah login, simpan booking sekarang.
+    $this->simpanBooking(auth()->user(), $kamar);
+
+    return redirect()->route('payment.show');
+}
+
+public function bookingVip()
+{
+    $kamar = Room::query()
+        ->where('kode_kamar', 'VIP')
+        ->firstOrFail();
+
+    if ($kamar->status !== 'tersedia') {
+        return redirect()
+            ->route('kamar')
+            ->with('error', 'Kamar VIP sedang tidak tersedia.');
+    }
+
+    session(['booking_room_id' => $kamar->id]);
+
+    if (!auth()->check()) {
+        return redirect()
+            ->route('register')
+            ->with('success', 'Silakan registrasi untuk melanjutkan booking.');
+    }
+
+    $this->simpanBooking(auth()->user(), $kamar);
+
+    return redirect()->route('payment.show');
+}
+
+private function simpanBooking(User $user, Room $room): Booking
+{
+    return DB::transaction(function () use ($user, $room) {
+        $room = Room::query()
+            ->lockForUpdate()
+            ->findOrFail($room->id);
+
+        if ($room->status !== 'tersedia') {
+            abort(409, 'Kamar sudah tidak tersedia.');
+        }
+
+        // Jangan membuat booking ganda untuk kamar dan user yang sama.
+        $booking = Booking::query()
+            ->where('user_id', $user->id)
+            ->where('room_id', $room->id)
+            ->whereIn('status', ['pending', 'menunggu_verifikasi', 'approved'])
             ->first();
 
-        if (!$kamar) {
-            return redirect()
-                ->route('kamar')
-                ->with('error', 'Data kamar VIP belum tersedia.');
+        if ($booking) {
+            return $booking;
         }
 
-        if ($kamar->status !== 'tersedia') {
-            return redirect()
-                ->route('kamar')
-                ->with('error', 'Kamar VIP sedang tidak tersedia.');
-        }
-
-        session(['booking_room_id' => $kamar->id]);
-
-        if (!auth()->check()) {
-            return redirect()
-                ->route('register')
-                ->with('success', 'Silakan registrasi untuk melanjutkan booking.');
-        }
-
-        return redirect()->route('payment.show');
-    }
+        return Booking::create([
+            'user_id' => $user->id,
+            'room_id' => $room->id,
+            'status' => 'pending',
+        ]);
+    });
+}
 }

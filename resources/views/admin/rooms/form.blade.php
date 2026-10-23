@@ -33,7 +33,9 @@
     </style>
 </head>
 <body>
-    <header class="topbar"><a class="brand" href="{{ route('dashboard') }}">Kost Athia</a></header>
+    <header class="topbar">
+        <a class="brand" href="{{ route('dashboard') }}">Kost Athia</a>
+    </header>
     <main class="page">
         <a class="back" href="{{ route('admin.rooms.index') }}">&larr; Kembali ke Data Kamar</a>
         <p class="eyebrow">PENGELOLAAN / KAMAR</p>

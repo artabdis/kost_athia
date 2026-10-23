@@ -92,9 +92,11 @@
             </div>
 
             <!-- Options -->
-            <div class="flex justify-between items-center text-sm">
+            <!-- <div class="flex justify-between items-center text-sm">
                 <a href="#" class="text-[#49769f] hover:underline">Lupa password?</a>
-            </div>
+            </div> -->
+            <div>
+</div>
 
             <!-- Button -->
             <button type="submit"
@@ -104,10 +106,10 @@
 
         </form>
 
-        <p class="text-center text-gray-400 text-sm mt-6">
+        <!-- <p class="text-center text-gray-400 text-sm mt-6">
             Belum punya akun?
             <a href="/register" class="text-[#49769f] hover:underline">daftar</a>
-        </p>
+        </p> -->
 
     </div>
 

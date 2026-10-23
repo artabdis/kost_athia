@@ -191,7 +191,7 @@
                 <p>Silakan membuat akun atau masuk untuk melanjutkan pemesanan kamar.</p>
                 <div class="booking-dialog-actions">
                     <a href="{{ route('register') }}">Buat akun</a>
-                    <a href="{{ route('login') }}">Sudah punya akun? Masuk</a>
+                    <!-- <a href="{{ route('login') }}">Sudah punya akun? Masuk</a> -->
                     <button type="button" id="close-booking-dialog">Tutup</button>
                 </div>
             </dialog>

@@ -71,6 +71,31 @@ class DashboardRoleTest extends TestCase
             ->assertSee('Belum ada bukti pembayaran.');
     }
 
+    public function test_admin_dashboard_requires_opening_room_management_for_crud_actions(): void
+    {
+        $admin = User::factory()->create();
+        $admin->forceFill(['role' => 'admin'])->save();
+
+        $room = Room::create([
+            'kode_kamar' => 'DASH-ACTION-01',
+            'nama' => 'Kamar DASH-ACTION-01',
+            'lokasi' => 'Lantai 1',
+            'harga' => 1500000,
+            'status' => 'tersedia',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Kelola Data Kamar')
+            ->assertSee($room->kode_kamar)
+            ->assertSee('Kelola Data Penghuni')
+            ->assertSee('/admin/residents', false)
+            ->assertDontSee(route('admin.rooms.create'), false)
+            ->assertDontSee(route('admin.rooms.edit', $room), false)
+            ->assertDontSee(route('admin.rooms.destroy', $room), false);
+    }
+
     public function test_admin_dashboard_statistics_use_database_records(): void
     {
         $admin = User::factory()->create();

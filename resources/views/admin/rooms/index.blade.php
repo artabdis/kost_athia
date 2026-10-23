@@ -117,7 +117,7 @@
                                     <td>{{ $room->bookings_count }}</td>
                                     <td>
                                         <div class="row-actions">
-                                            <a class="button secondary" href="{{ $room->kode_kamar === 'VIP' ? route('kamar.vip') : route('kamar.detail', $room->id) }}">Detail</a>
+                                            <!-- <a class="button secondary" href="{{ $room->kode_kamar === 'VIP' ? route('kamar.vip') : route('kamar.detail', $room->id) }}">Detail</a> -->
                                             <a class="button secondary" href="{{ route('admin.rooms.edit', $room) }}">Edit</a>
                                             <form action="{{ route('admin.rooms.destroy', $room) }}" method="POST" onsubmit="return confirm('Hapus data kamar {{ $room->kode_kamar }}? Kamar dengan booking tidak dapat dihapus.')">
                                                 @csrf

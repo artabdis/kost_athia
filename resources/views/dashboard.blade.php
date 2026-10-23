@@ -822,10 +822,12 @@
                         Pembayaran
                     </a>
 
-                    <a class="nav-link" href="#bookings">
-                        <span class="nav-icon" aria-hidden="true">◷</span>
-                        Data Booking
+                    <a class="nav-link" href="{{ route('admin.keluhan.index') }}">
+                        <span class="nav-icon" aria-hidden="true">⚠</span>
+                        Keluhan
                     </a>
+
+
 
                 @else
 
@@ -836,10 +838,6 @@
                         Dashboard
                     </a>
 
-                    <a class="nav-link" href="#my-rooms">
-                        <span class="nav-icon" aria-hidden="true">▦</span>
-                        Kamar Saya
-                    </a>
 
                     <a class="nav-link" href="#my-payment">
                         <span class="nav-icon" aria-hidden="true">Rp</span>
@@ -849,6 +847,11 @@
                     <a class="nav-link" href="#history">
                         <span class="nav-icon" aria-hidden="true">◷</span>
                         Riwayat Pembayaran
+                    </a>
+
+                    <a class="nav-link" href="{{ route('keluhan.index') }}">
+                        <span class="nav-icon" aria-hidden="true">⚠</span>
+                        Keluhan
                     </a>
 
                     <a class="nav-link" href="#profile">
@@ -1531,19 +1534,10 @@
 
                             </div>
 
-                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-
-                                <a class="button secondary"
-                                    href="{{ route('admin.rooms.index') }}">
-                                    Kelola Data Kamar
-                                </a>
-
-                                <a class="button"
-                                    href="{{ route('admin.rooms.create') }}">
-                                    + Tambah Kamar
-                                </a>
-
-                            </div>
+                            <a class="button secondary"
+                                href="{{ route('admin.rooms.index') }}">
+                                Kelola Data Kamar
+                            </a>
 
                         </div>
 
@@ -1575,7 +1569,6 @@
                                                 <th>Lokasi</th>
                                                 <th>Harga</th>
                                                 <th>Status</th>
-                                                <th>Aksi</th>
                                             </tr>
 
                                         </thead>
@@ -1619,15 +1612,6 @@
 
                                                     </td>
 
-                                                    <td>
-
-                                                        <a class="button secondary small"
-                                                            href="{{ route('admin.rooms.edit', $room) }}">
-                                                            Edit
-                                                        </a>
-
-                                                    </td>
-
                                                 </tr>
 
                                             @endforeach
@@ -1660,6 +1644,11 @@
                                 </p>
 
                             </div>
+
+                            <a class="button secondary"
+                                href="{{ route('admin.residents.index') }}">
+                                Kelola Data Penghuni
+                            </a>
 
                         </div>
 
@@ -1736,111 +1725,7 @@
                     </section>
 
 
-                    {{-- ==================== BOOKING ADMIN ==================== --}}
-
-                    <section class="section" id="bookings">
-
-                        <div class="section-heading">
-
-                            <div>
-
-                                <h2>Booking terbaru</h2>
-
-                                <p>
-                                    Data booking yang tersimpan pada tabel bookings.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                        <div class="panel">
-
-                            @if ($bookings->isEmpty())
-
-                                <div class="empty-state">
-
-                                    <strong>
-                                        Belum ada data booking.
-                                    </strong>
-
-                                    Tabel booking tersedia, tetapi alur pemesanan saat ini belum menyimpan booking ke
-                                    tabel tersebut.
-
-                                </div>
-
-                            @else
-
-                                <div class="table-wrap">
-
-                                    <table>
-
-                                        <thead>
-
-                                            <tr>
-                                                <th>Penghuni</th>
-                                                <th>Kamar</th>
-                                                <th>Tanggal booking</th>
-                                                <th>Status</th>
-                                            </tr>
-
-                                        </thead>
-
-                                        <tbody>
-
-                                            @foreach ($bookings as $booking)
-
-                                                <tr>
-
-                                                    <td>
-
-                                                        <strong>
-                                                            {{ $booking->user?->name ?? 'Pengguna tidak tersedia' }}
-                                                        </strong>
-
-                                                        <br>
-
-                                                        <span class="muted">
-                                                            {{ $booking->user?->email }}
-                                                        </span>
-
-                                                    </td>
-
-                                                    <td>
-
-                                                        {{ $booking->room?->kode_kamar ?? 'Kamar tidak tersedia' }}
-
-                                                        {{ $booking->room ? ' · ' . $booking->room->nama : '' }}
-
-                                                    </td>
-
-                                                    <td>
-                                                        {{ $booking->created_at?->format('d M Y') ?? '—' }}
-                                                    </td>
-
-                                                    <td>
-
-                                                        <span class="badge neutral">
-                                                            {{ ucfirst($booking->status) }}
-                                                        </span>
-
-                                                    </td>
-
-                                                </tr>
-
-                                            @endforeach
-
-                                        </tbody>
-
-                                    </table>
-
-                                </div>
-
-                            @endif
-
-                        </div>
-
-                    </section>
+    
 
 
                 @else
@@ -1860,129 +1745,7 @@
                     @endphp
 
 
-                    {{-- ==================== KAMAR SAYA ==================== --}}
-
-                    <section class="section" id="my-rooms">
-
-                        <div class="section-heading">
-
-                            <div>
-
-                                <h2>Kamar Saya</h2>
-
-                                <p>
-                                    Detail kamar yang sedang digunakan oleh Anda.
-                                </p>
-
-                            </div>
-
-                            <a class="button secondary"
-                                href="{{ route('kamar') }}">
-                                Jelajahi Kamar
-                            </a>
-
-                        </div>
-
-                        <div class="panel">
-
-                            @if ($bookings->isEmpty())
-
-                                <div class="empty-state">
-
-                                    <strong>
-                                        Belum ada kamar yang terhubung.
-                                    </strong>
-
-                                    Data booking belum tercatat untuk akun ini.
-
-                                    <br>
-
-                                    <a class="button"
-                                        href="{{ route('kamar') }}">
-                                        Lihat Kamar
-                                    </a>
-
-                                </div>
-
-                            @else
-
-                                <div class="info-grid panel-body">
-
-                                    @foreach ($bookings as $booking)
-
-                                        <article class="info-card">
-
-                                            <h3>
-                                                {{ $booking->room?->nama ?? 'Kamar tidak tersedia' }}
-                                            </h3>
-
-                                            <dl class="detail-list">
-
-                                                <div class="detail-row">
-                                                    <dt>Nomor kamar</dt>
-
-                                                    <dd>
-                                                        {{ $booking->room?->kode_kamar ?? '—' }}
-                                                    </dd>
-                                                </div>
-
-                                                <div class="detail-row">
-                                                    <dt>Lokasi</dt>
-
-                                                    <dd>
-                                                        {{ $booking->room?->lokasi ?? '—' }}
-                                                    </dd>
-                                                </div>
-
-                                                <div class="detail-row">
-                                                    <dt>Harga sewa</dt>
-
-                                                    <dd>
-                                                        {{ $booking->room
-                                                            ? 'Rp ' . number_format($booking->room->harga, 0, ',', '.')
-                                                            : '—' }}
-                                                    </dd>
-                                                </div>
-
-                                                <div class="detail-row">
-                                                    <dt>Status kamar</dt>
-
-                                                    <dd>
-                                                        {{ $booking->room
-                                                            ? ucfirst($booking->room->status)
-                                                            : '—' }}
-                                                    </dd>
-                                                </div>
-
-                                                <div class="detail-row">
-                                                    <dt>Status booking</dt>
-
-                                                    <dd>
-                                                        {{ ucfirst($booking->status) }}
-                                                    </dd>
-                                                </div>
-
-                                                <div class="detail-row">
-                                                    <dt>Tanggal booking</dt>
-
-                                                    <dd>
-                                                        {{ $booking->created_at?->format('d M Y') ?? '—' }}
-                                                    </dd>
-                                                </div>
-
-                                            </dl>
-
-                                        </article>
-
-                                    @endforeach
-
-                                </div>
-
-                            @endif
-
-                        </div>
-
-                    </section>
+                    
 
 
                     {{-- ==================== PEMBAYARAN PENGHUNI ==================== --}}
@@ -2171,6 +1934,67 @@
 
                     </section>
 
+
+                    {{-- ==================== KAMAR YANG DIBOOKING ==================== --}}
+                    <section class="section" id="my-room">
+                        <div class="section-heading">
+                            <div>
+                                <h2>Kamar yang Dibooking</h2>
+                                <p>Informasi kamar yang Anda pilih saat melakukan booking.</p>
+                            </div>
+                        </div>
+
+                        <div class="panel">
+                            @if ($bookings->isEmpty())
+                                <div class="empty-state">
+                                    <strong>Belum ada kamar yang dibooking.</strong>
+                                    <p>Saat ini belum ada data booking kamar pada akun Anda.</p>
+                                </div>
+                            @else
+                                <div class="panel-body">
+                                    @foreach ($bookings as $booking)
+                                        <div class="info-card" style="margin-bottom: 15px;">
+                                            <div class="detail-list">
+
+                                                <div class="detail-row">
+                                                    <span>Kode Kamar</span>
+                                                    <strong>{{ $booking->room?->kode_kamar ?? '—' }}</strong>
+                                                </div>
+
+                                                <div class="detail-row">
+                                                    <span>Nama Kamar</span>
+                                                    <strong>{{ $booking->room?->nama ?? '—' }}</strong>
+                                                </div>
+
+                                                <div class="detail-row">
+                                                    <span>Harga Kamar</span>
+                                                    <strong>
+                                                        @if ($booking->room?->harga !== null)
+                                                            Rp {{ number_format($booking->room->harga, 0, ',', '.') }}
+                                                        @else
+                                                            —
+                                                        @endif
+                                                    </strong>
+                                                </div>
+
+                                                <div class="detail-row">
+                                                    <span>Status Pembayaran</span>
+                                                    <strong>
+                                                        @if (Auth::user()->payment_status === 'approved')
+                                                            Lunas
+                                                        @else
+                                                            Belum Lunas
+                                                        @endif
+                                                    </strong>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    </section>
 
                     {{-- ==================== RIWAYAT PEMBAYARAN ==================== --}}
 

@@ -43,7 +43,10 @@ class AuthController extends Controller
 
         return redirect()
             ->route('payment.show')
-            ->with('info', 'Silakan selesaikan pembayaran. Dashboard dapat diakses setelah pembayaran diverifikasi admin.');
+            ->with(
+                'info',
+                'Silakan selesaikan pembayaran. Dashboard dapat diakses setelah pembayaran diverifikasi admin.'
+            );
     }
 
     public function register(Request $request): RedirectResponse
@@ -67,7 +70,18 @@ class AuthController extends Controller
             'email.email' => 'Isi data dengan valid.',
         ]);
 
-        // Buat akun dan pertahankan aturan role yang sudah ada.
+        /*
+        |--------------------------------------------------------------------------
+        | Ambil kamar yang dipilih sebelum session diregenerasi
+        |--------------------------------------------------------------------------
+        */
+        $bookingRoomId = $request->session()->get('booking_room_id');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Buat akun
+        |--------------------------------------------------------------------------
+        */
         $user = DB::transaction(function () use ($validated): User {
             $role = User::query()->doesntExist() ? 'admin' : 'user';
 
@@ -77,17 +91,56 @@ class AuthController extends Controller
                 'password' => Hash::make($validated['password']),
             ]);
 
-            $user->forceFill(['role' => $role])->save();
+            $user->forceFill([
+                'role' => $role,
+            ])->save();
 
             return $user;
         });
 
-        // Login otomatis setelah registrasi berhasil.
+        /*
+        |--------------------------------------------------------------------------
+        | Simpan kamar yang dipilih ke booking user
+        |--------------------------------------------------------------------------
+        */
+        if ($user->role === 'user' && $bookingRoomId) {
+
+            $room = Room::query()->find($bookingRoomId);
+
+            if ($room && $room->status === 'tersedia') {
+
+                Booking::query()->firstOrCreate(
+                    [
+                        'user_id' => $user->id,
+                        'room_id' => $room->id,
+                    ],
+                    [
+                        'status' => 'pending',
+                    ]
+                );
+
+                /*
+                | Setelah booking berhasil disimpan,
+                | hapus pilihan kamar dari session.
+                */
+                $request->session()->forget('booking_room_id');
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Login otomatis setelah registrasi
+        |--------------------------------------------------------------------------
+        */
         Auth::login($user);
 
-        // Perbarui session tanpa menghapus pilihan kamar.
         $request->session()->regenerate();
 
+        /*
+        |--------------------------------------------------------------------------
+        | Redirect sesuai role
+        |--------------------------------------------------------------------------
+        */
         if ($user->role === 'admin') {
             return redirect()
                 ->route('dashboard')
@@ -96,13 +149,21 @@ class AuthController extends Controller
 
         return redirect()
             ->route('payment.show')
-            ->with('success', 'Registrasi berhasil. Silakan unggah bukti pembayaran untuk diverifikasi admin.');
+            ->with(
+                'success',
+                'Registrasi berhasil. Silakan unggah bukti pembayaran untuk diverifikasi admin.'
+            );
     }
 
     public function dashboard(): View|RedirectResponse
     {
         $user = Auth::user();
 
+        /*
+        |--------------------------------------------------------------------------
+        | DASHBOARD ADMIN
+        |--------------------------------------------------------------------------
+        */
         if ($user->role === 'admin') {
             return view('dashboard', [
                 'payments' => User::query()
@@ -157,9 +218,18 @@ class AuthController extends Controller
             ]);
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | DASHBOARD PENGHUNI
+        |--------------------------------------------------------------------------
+        */
         abort_unless($user->role === 'user', 403);
 
-        // PEMBAYARAN AWAL TETAP SEPERTI SEBELUMNYA
+        /*
+        |--------------------------------------------------------------------------
+        | PEMBAYARAN AWAL TETAP SEPERTI SEBELUMNYA
+        |--------------------------------------------------------------------------
+        */
         if ($user->payment_status !== 'approved') {
             return redirect()
                 ->route('payment.show')
@@ -170,12 +240,17 @@ class AuthController extends Controller
         }
 
         return view('dashboard', [
+            /*
+            | Booking hanya milik user yang sedang login.
+            */
             'bookings' => $user->bookings()
                 ->with('room')
                 ->latest()
                 ->get(),
 
-            // TAGIHAN HANYA MILIK USER YANG SEDANG LOGIN
+            /*
+            | Tagihan hanya milik user yang sedang login.
+            */
             'tagihans' => Tagihan::query()
                 ->with('room')
                 ->where('user_id', $user->id)
@@ -193,4 +268,4 @@ class AuthController extends Controller
 
         return redirect()->route('login');
     }
-}
+}    

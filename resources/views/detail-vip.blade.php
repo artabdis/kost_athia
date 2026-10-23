@@ -547,9 +547,9 @@
                         Buat akun
                     </a>
 
-                    <a href="{{ route('login') }}">
+                    <!-- <a href="{{ route('login') }}">
                         Sudah punya akun? Masuk
-                    </a>
+                    </a> -->
 
                     <button
                         type="button"
