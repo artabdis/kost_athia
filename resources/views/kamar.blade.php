@@ -413,6 +413,7 @@
             'tersedia' => 'Tersedia',
             'terisi' => 'Terisi',
             'belum_dikonfirmasi' => 'Belum dikonfirmasi',
+            'sedang_dipesan' => 'Sedang dipesan',
         ];
     @endphp
 
@@ -491,9 +492,9 @@
                     @endphp
 
                     <span
-                        class="kamar-status {{ $roomA01?->status === 'tersedia' ? '' : ($roomA01?->status === 'terisi' ? 'unavailable' : 'unconfirmed') }}">
+                        class="kamar-status {{ $roomA01?->has_active_booking ? 'unavailable' : ($roomA01?->status === 'tersedia' ? '' : ($roomA01?->status === 'terisi' ? 'unavailable' : 'unconfirmed')) }}">
 
-                        {{ $roomStatusLabels[$roomA01?->status] ?? 'Full' }}
+                        {{ $roomA01?->has_active_booking ? 'Sedang dipesan' : ($roomStatusLabels[$roomA01?->status] ?? 'Full') }}
 
                     </span>
 
@@ -544,9 +545,9 @@
                     @endphp
 
                     <span
-                        class="kamar-status {{ $roomB01?->status === 'tersedia' ? '' : ($roomB01?->status === 'terisi' ? 'unavailable' : 'unconfirmed') }}">
+                        class="kamar-status {{ $roomB01?->has_active_booking ? 'unavailable' : ($roomB01?->status === 'tersedia' ? '' : ($roomB01?->status === 'terisi' ? 'unavailable' : 'unconfirmed')) }}">
 
-                        {{ $roomStatusLabels[$roomB01?->status] ?? 'Status belum tersedia' }}
+                        {{ $roomB01?->has_active_booking ? 'Sedang dipesan' : ($roomStatusLabels[$roomB01?->status] ?? 'Status belum tersedia') }}
 
                     </span>
 
@@ -597,9 +598,9 @@
                     @endphp
 
                     <span
-                        class="kamar-status {{ $roomB02?->status === 'tersedia' ? '' : ($roomB02?->status === 'terisi' ? 'unavailable' : 'unconfirmed') }}">
+                        class="kamar-status {{ $roomB02?->has_active_booking ? 'unavailable' : ($roomB02?->status === 'tersedia' ? '' : ($roomB02?->status === 'terisi' ? 'unavailable' : 'unconfirmed')) }}">
 
-                        {{ $roomStatusLabels[$roomB02?->status] ?? 'Status belum tersedia' }}
+                        {{ $roomB02?->has_active_booking ? 'Sedang dipesan' : ($roomStatusLabels[$roomB02?->status] ?? 'Status belum tersedia') }}
 
                     </span>
 
@@ -625,9 +626,9 @@
                             @endif
 
                             <span
-                                class="kamar-status {{ $room->status === 'tersedia' ? '' : ($room->status === 'terisi' ? 'unavailable' : 'unconfirmed') }}">
+                                class="kamar-status {{ $room->has_active_booking ? 'unavailable' : ($room->status === 'tersedia' ? '' : ($room->status === 'terisi' ? 'unavailable' : 'unconfirmed')) }}">
 
-                                {{ $roomStatusLabels[$room->status] ?? ucfirst($room->status) }}
+                                {{ $room->has_active_booking ? 'Sedang dipesan' : ($roomStatusLabels[$room->status] ?? ucfirst($room->status)) }}
 
                             </span>
 

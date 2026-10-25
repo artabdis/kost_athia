@@ -8,6 +8,8 @@ use App\Http\Controllers\ResidentManagementController;
 use App\Http\Controllers\RoomsController;
 use App\Http\Controllers\TagihanController;
 use App\Http\Controllers\KeluhanController;
+use App\Models\Room;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -23,7 +25,9 @@ Route::post('/login', [AuthController::class, 'login'])
 
 // Register
 Route::get('/register', function () {
-    return view('register');
+    $selectedRoom = Room::query()->find(request()->session()->get('booking_room_id'));
+
+    return view('register', compact('selectedRoom'));
 })->name('register');
 
 Route::post('/register', [AuthController::class, 'register'])
@@ -36,16 +40,17 @@ Route::get('/dashboard', [AuthController::class, 'dashboard'])
     ->name('dashboard');
 
 
-// =========================================================
 // AUTHENTICATED ROUTES
-// =========================================================
 
 Route::middleware('auth')->group(function () {
+    Route::put('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
 
-    // =====================================================
+    Route::delete('/profile/photo', [ProfileController::class, 'destroyPhoto'])
+        ->name('profile.photo.destroy');
+
     // PEMBAYARAN AWAL
-    // JANGAN DIUBAH
-    // =====================================================
+
 
     Route::get('/payment', [PaymentController::class, 'show'])
         ->name('payment.show');
@@ -60,9 +65,7 @@ Route::middleware('auth')->group(function () {
         ->name('admin.payment.verify');
 
 
-    // =====================================================
     // ADMIN KELOLA KAMAR
-    // =====================================================
 
     Route::prefix('admin/rooms')
         ->name('admin.rooms.')
@@ -88,7 +91,7 @@ Route::middleware('auth')->group(function () {
                 ->name('destroy');
         });
 
-        
+
 
     Route::prefix('admin/residents')
         ->name('admin.residents.')
@@ -104,9 +107,13 @@ Route::middleware('auth')->group(function () {
         });
 
 
-    // =====================================================
     // TAGIHAN PENGHUNI
-    // =====================================================
+
+    Route::get('/admin/tagihan/create', [TagihanController::class, 'create'])
+        ->name('admin.tagihan.create');
+
+    Route::post('/admin/tagihan', [TagihanController::class, 'store'])
+        ->name('admin.tagihan.store');
 
     // Detail tagihan
     Route::get('/tagihan/{tagihan}', [TagihanController::class, 'show'])
@@ -117,9 +124,7 @@ Route::middleware('auth')->group(function () {
         ->name('tagihan.bayar');
 
 
-    // =====================================================
     // VERIFIKASI TAGIHAN OLEH ADMIN
-    // =====================================================
 
     // Admin melihat bukti tagihan
     Route::get('/admin/tagihan/{tagihan}/proof', [TagihanController::class, 'proof'])
@@ -129,10 +134,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/tagihan/{tagihan}/verify', [TagihanController::class, 'verify'])
         ->name('admin.tagihan.verify');
 });
-
-// =====================================================
-// KELUHAN
-// =====================================================
+// KELUHA
 
     Route::get('/keluhan', [KeluhanController::class, 'index'])
         ->name('keluhan.index');
@@ -146,12 +148,10 @@ Route::middleware('auth')->group(function () {
 
     // Admin mengubah status dan memberikan tanggapan
     Route::put('/admin/keluhan/{keluhan}', [KeluhanController::class, 'update'])
-        ->name('admin.keluhan.update'); 
+        ->name('admin.keluhan.update');
 
 
-// =========================================================
 // KAMAR
-// =========================================================
 
 Route::get('/kamar', [RoomsController::class, 'index'])
     ->name('kamar');
@@ -162,10 +162,10 @@ Route::get('/kamar/vip', [RoomsController::class, 'showVip'])
 Route::get('/kamar/{id}', [RoomsController::class, 'show'])
     ->name('kamar.detail');
 
-Route::get('/kamar/vip/booking', [RoomsController::class, 'bookingVip'])
+Route::post('/kamar/vip/booking', [RoomsController::class, 'bookingVip'])
     ->name('kamar.vip.booking');
 
-Route::get('/kamar/{id}/booking', [RoomsController::class, 'booking'])
+Route::post('/kamar/{id}/booking', [RoomsController::class, 'booking'])
     ->name('kamar.booking');
 
 

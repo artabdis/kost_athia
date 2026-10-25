@@ -392,7 +392,9 @@
 
             <!-- SISI KIRI: GAMBAR & STATUS -->
             @php
-                $vipStatus = $room?->status ?? 'belum tersedia';
+                $vipStatus = $bookingEnabled
+                    ? ($room?->status ?? 'belum tersedia')
+                    : ($room?->status === 'tersedia' ? 'sedang dipesan' : ($room?->status ?? 'belum tersedia'));
             @endphp
 
             <div class="detail-image-box">
@@ -479,16 +481,14 @@
 
 
                 <!-- TOMBOL BOOKING -->
-                @if ($room?->status === 'tersedia')
+                @if ($bookingEnabled)
 
                     @auth
 
-                        <a
-                            href="{{ route('kamar.vip.booking') }}"
-                            class="btn-booking"
-                        >
-                            Booking
-                        </a>
+                        <form action="{{ route('kamar.vip.booking') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn-booking">Booking</button>
+                        </form>
 
                     @else
 
@@ -524,7 +524,7 @@
     <!-- DIALOG UNTUK USER YANG BELUM LOGIN -->
     @guest
 
-        @if ($room?->status === 'tersedia')
+        @if ($bookingEnabled)
 
             <dialog
                 class="booking-dialog"
@@ -543,9 +543,10 @@
 
                 <div class="booking-dialog-actions">
 
-                    <a href="{{ route('register') }}">
-                        Buat akun
-                    </a>
+                    <form action="{{ route('kamar.vip.booking') }}" method="POST">
+                        @csrf
+                        <button type="submit">Buat akun</button>
+                    </form>
 
                     <!-- <a href="{{ route('login') }}">
                         Sudah punya akun? Masuk

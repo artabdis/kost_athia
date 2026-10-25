@@ -62,6 +62,14 @@
             </div>
         @endif
 
+        @if ($selectedRoom ?? false)
+            <div class="mb-4 p-3 bg-blue-500/20 text-blue-200 rounded-lg text-sm">
+                Kamar yang dipilih:
+                <strong>{{ $selectedRoom->kode_kamar }} — {{ $selectedRoom->nama }}</strong>
+                (Rp {{ number_format($selectedRoom->harga, 0, ',', '.') }} per bulan)
+            </div>
+        @endif
+
         <!-- Form -->
         <form method="POST" action="/register" class="space-y-4">
             <!-- CSRF (Laravel) -->

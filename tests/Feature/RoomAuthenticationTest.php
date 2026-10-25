@@ -16,7 +16,7 @@ class RoomAuthenticationTest extends TestCase
         $this->get('/kamar')->assertOk();
         $this->get('/kamar/vip')
             ->assertOk()
-            ->assertSee('Silahkan membuat akun untuk melanjutkan pemesanan kamar.');
+            ->assertSee('Buat akun untuk booking');
         $this->get('/kamar/A01')
             ->assertOk()
             ->assertSee('Kamar A01')
@@ -51,7 +51,7 @@ class RoomAuthenticationTest extends TestCase
         $this->actingAs(User::factory()->create())
             ->get(route('kamar.detail', $room->id))
             ->assertOk()
-            ->assertSee('A01 Database')
+            ->assertSee('Kamar Q01 Database')
             ->assertSee('Rp800.000')
             ->assertSee(route('kamar.booking', $room->id));
     }
@@ -59,10 +59,10 @@ class RoomAuthenticationTest extends TestCase
     public function test_unconfirmed_catalog_room_cannot_be_booked(): void
     {
         $room = Room::query()->where('kode_kamar', 'A01')->firstOrFail();
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'user']);
 
         $this->actingAs($user)
-            ->get(route('kamar.booking', $room->id))
+            ->post(route('kamar.booking', $room->id))
             ->assertRedirect(route('kamar'))
             ->assertSessionHas('error');
 
@@ -74,6 +74,8 @@ class RoomAuthenticationTest extends TestCase
 
     public function test_guest_is_redirected_to_login_when_booking_a_room(): void
     {
-        $this->get('/kamar/vip/booking')->assertRedirect(route('login'));
+        $this->post('/kamar/vip/booking')
+            ->assertRedirect(route('register'))
+            ->assertSessionHas('booking_room_id');
     }
 }

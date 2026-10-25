@@ -23,6 +23,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'profile_photo_path',
     ];
 
     /**
@@ -56,5 +57,10 @@ class User extends Authenticatable
     public function tagihans(): HasMany
     {
         return $this->hasMany(Tagihan::class);
+    }
+
+    public function isApprovedResident(): bool
+    {
+        return $this->payment_status === 'approved';
     }
 }

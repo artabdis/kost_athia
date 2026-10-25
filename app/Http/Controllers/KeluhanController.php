@@ -9,9 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class KeluhanController extends Controller
 {
-    // =========================
     // PENGHUNI - LIHAT KELUHAN
-    // =========================
     public function index()
     {
         abort_unless(Auth::user()->role === 'user', 403);
@@ -24,9 +22,7 @@ class KeluhanController extends Controller
         return view('keluhan', compact('keluhans'));
     }
 
-    // =========================
     // PENGHUNI - KIRIM KELUHAN
-    // =========================
     public function store(Request $request): RedirectResponse
     {
         abort_unless(Auth::user()->role === 'user', 403);
@@ -70,9 +66,7 @@ class KeluhanController extends Controller
             ->with('success', 'Keluhan berhasil dikirim.');
     }
 
-    // =========================
     // ADMIN - LIHAT SEMUA KELUHAN
-    // =========================
     public function adminIndex()
     {
         abort_unless(Auth::user()->role === 'admin', 403);
@@ -85,9 +79,7 @@ class KeluhanController extends Controller
         return view('keluhan', compact('keluhans'));
     }
 
-    // =========================
     // ADMIN - UPDATE KELUHAN
-    // =========================
     public function update(Request $request, Keluhan $keluhan): RedirectResponse
     {
         abort_unless(Auth::user()->role === 'admin', 403);

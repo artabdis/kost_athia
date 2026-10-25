@@ -119,11 +119,14 @@
     <main class="container">
         <a href="{{ route('kamar') }}" class="back-link">&larr; Kembali ke daftar kamar</a>
         @php
-            $status = $kamar->status;
+            $status = $bookingEnabled
+                ? $kamar->status
+                : ($kamar->status === 'tersedia' ? 'sedang_dipesan' : $kamar->status);
             $statusLabels = [
                 'tersedia' => 'Tersedia',
                 'terisi' => 'Terisi',
                 'belum_dikonfirmasi' => 'Belum dikonfirmasi',
+                'sedang_dipesan' => 'Sedang dipesan',
             ];
             $statusKnown = isset($statusLabels[$status]);
         @endphp
@@ -163,7 +166,9 @@
                       akses Wi-Fi, listrik, serta lngkungan kos yang juga terjaga kebersihannya 
                       sehingga penghuni dapat tinggal dengan nyaman dan aman.</p>
 
-                @if (! $statusKnown || $status === 'belum_dikonfirmasi')
+                @if ($status === 'sedang_dipesan')
+                    <p class="notice">Kamar sedang menunggu konfirmasi booking dan belum dapat dipesan kembali.</p>
+                @elseif (! $statusKnown || $status === 'belum_dikonfirmasi')
                     <p class="notice">
                         {{ $status === 'belum_dikonfirmasi'
                             ? 'Status kamar belum dikonfirmasi. Booking belum dapat dilakukan sampai admin menetapkan ketersediaannya.'
@@ -173,12 +178,17 @@
 
                 @if ($bookingEnabled)
                     @auth
-                        <a href="{{ route('kamar.booking', $kamar->id) }}" class="btn-booking">Booking Kamar Ini</a>
+                        <form action="{{ route('kamar.booking', $kamar->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn-booking">Booking Kamar Ini</button>
+                        </form>
                     @else
                         <button type="button" class="btn-booking" id="booking-button">Booking</button>
                     @endauth
                 @elseif ($status === 'terisi')
                     <button type="button" class="btn-booking btn-disabled" disabled>Kamar Sudah Terisi</button>
+                @elseif ($kamar->status === 'tersedia')
+                    <button type="button" class="btn-booking btn-disabled" disabled>Kamar Sedang Dipesan</button>
                 @endif
             </div>
         </section>
@@ -190,7 +200,10 @@
                 <h2 id="booking-dialog-title">Buat akun untuk booking</h2>
                 <p>Silakan membuat akun atau masuk untuk melanjutkan pemesanan kamar.</p>
                 <div class="booking-dialog-actions">
-                    <a href="{{ route('register') }}">Buat akun</a>
+                    <form action="{{ route('kamar.booking', $kamar->id) }}" method="POST">
+                        @csrf
+                        <button type="submit">Buat akun</button>
+                    </form>
                     <!-- <a href="{{ route('login') }}">Sudah punya akun? Masuk</a> -->
                     <button type="button" id="close-booking-dialog">Tutup</button>
                 </div>

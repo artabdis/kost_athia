@@ -626,6 +626,52 @@
             color: var(--muted);
         }
 
+        .profile-photo {
+            display: block;
+            width: 58px;
+            height: 58px;
+            flex: 0 0 auto;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-form {
+            display: grid;
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        .profile-field {
+            display: grid;
+            gap: 7px;
+            max-width: 520px;
+        }
+
+        .profile-field label {
+            color: #334155;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .profile-field input {
+            width: 100%;
+            min-height: 39px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 9px 11px;
+        }
+
+        .profile-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .profile-form + form {
+            margin-top: 10px;
+        }
+
         @media (max-width: 1100px) {
             .main-content {
                 padding-right: 26px;
@@ -764,7 +810,7 @@
         $statusLabels = [
             'pending' => 'Belum mengunggah',
             'submitted' => 'Menunggu verifikasi',
-            'approved' => 'Lunas / disetujui',
+            'approved' => 'Disetujui',
             'rejected' => 'Ditolak',
         ];
 
@@ -773,6 +819,13 @@
             'submitted' => 'waiting',
             'approved' => 'approved',
             'rejected' => 'rejected',
+        ];
+
+        $residentStatusLabels = [
+            'pending' => 'Menunggu persetujuan',
+            'submitted' => 'Menunggu persetujuan',
+            'approved' => 'Disetujui',
+            'rejected' => 'Menunggu persetujuan',
         ];
 
         $roomStatusLabels = [
@@ -799,8 +852,8 @@
 
                 @if ($isAdmin)
 
-                    {{-- ==================== ADMIN ==================== --}}
-                    {{-- BAGIAN ADMIN TIDAK DIUBAH --}}
+                    {{--  ADMIN  --}}
+
 
                     <a class="nav-link active" href="#overview">
                         <span class="nav-icon" aria-hidden="true">⌂</span>
@@ -817,9 +870,9 @@
                         Data Penghuni
                     </a>
 
-                    <a class="nav-link" href="#payments">
+                    <a class="nav-link" href="#resident-bills">
                         <span class="nav-icon" aria-hidden="true">Rp</span>
-                        Pembayaran
+                        Tagihan Penghuni
                     </a>
 
                     <a class="nav-link" href="{{ route('admin.keluhan.index') }}">
@@ -827,11 +880,9 @@
                         Keluhan
                     </a>
 
-
-
                 @else
 
-                    {{-- ==================== PENGHUNI ==================== --}}
+                    {{--  PENGHUNI  --}}
 
                     <a class="nav-link active" href="#overview">
                         <span class="nav-icon" aria-hidden="true">⌂</span>
@@ -854,12 +905,12 @@
                         Keluhan
                     </a>
 
-                    <a class="nav-link" href="#profile">
-                        <span class="nav-icon" aria-hidden="true">♙</span>
-                        Profil Saya
-                    </a>
-
                 @endif
+
+                <a class="nav-link" href="#profile">
+                    <span class="nav-icon" aria-hidden="true">♙</span>
+                    Profil Saya
+                </a>
 
                 <form class="mobile-logout" action="{{ route('logout') }}" method="POST">
                     @csrf
@@ -908,7 +959,7 @@
 
                         <p class="page-subtitle">
                             {{ $isAdmin
-                                ? 'Pantau kondisi kamar, penghuni, booking, dan pembayaran.'
+                                ? 'Pantau kondisi kamar, penghuni, dan tagihan pembayaran.'
                                 : 'Kelola informasi kamar dan pantau tagihan pembayaran Anda.' }}
                         </p>
                     </div>
@@ -916,6 +967,10 @@
                     <span class="role-pill">
                         {{ $isAdmin ? 'Administrator' : 'Penghuni' }}
                     </span>
+
+                    @unless ($isAdmin)
+                        <span class="badge approved">Status penghuni: Disetujui</span>
+                    @endunless
 
                 </header>
 
@@ -938,9 +993,9 @@
                 @endif
 
 
-                {{-- ========================================================= --}}
-                {{-- ======================= ADMIN =========================== --}}
-                {{-- ========================================================= --}}
+
+                {{-- ADMIN --}}
+
 
                 @if ($isAdmin)
 
@@ -1042,7 +1097,7 @@
                     </section>
 
 
-                    {{-- ==================== PEMBAYARAN ADMIN ==================== --}}
+                    {{--  PEMBAYARAN ADMIN  --}}
 
                     <section class="section" id="payments">
 
@@ -1063,7 +1118,7 @@
 
                         {{-- PEMBAYARAN AWAL --}}
 
-                        <div class="panel">
+                        {{-- <div class="panel">
 
                             <div class="panel-body" style="border-bottom: 1px solid var(--line);">
 
@@ -1095,10 +1150,10 @@
                                 <div class="empty-state">
 
                                     <strong>
-                                        Belum ada bukti pembayaran.
+                                        Belum ada akun penghuni.
                                     </strong>
 
-                                    Pembayaran awal penghuni yang sudah mengunggah bukti akan muncul di sini.
+                                    Akun penghuni akan tampil di sini setelah registrasi.
 
                                 </div>
 
@@ -1114,6 +1169,7 @@
                                                 <th>Penghuni</th>
                                                 <th>Pembaruan terakhir</th>
                                                 <th>Status</th>
+                                                <th>Catatan penolakan</th>
                                                 <th>Bukti</th>
                                                 <th>Aksi</th>
                                             </tr>
@@ -1148,31 +1204,38 @@
 
                                                         <span class="badge {{ $statusClasses[$payment->payment_status] ?? 'neutral' }}">
 
-                                                            {{ $statusLabels[$payment->payment_status] ?? ucfirst($payment->payment_status) }}
+                                                            {{ $payment->payment_proof
+                                                                ? ($statusLabels[$payment->payment_status] ?? ucfirst($payment->payment_status))
+                                                                : 'Belum mengunggah' }}
 
                                                         </span>
 
                                                     </td>
 
                                                     <td>
+                                                        {{ $payment->payment_status === 'rejected' ? ($payment->payment_note ?: '—') : '—' }}
+                                                    </td>
 
-                                                        <a class="proof-link"
-                                                            href="{{ route('admin.payment.proof', $payment) }}"
-                                                            target="_blank"
-                                                            rel="noopener"
-                                                            aria-label="Buka bukti pembayaran {{ $payment->name }}">
-
-                                                            <img class="proof-image"
-                                                                src="{{ route('admin.payment.proof', $payment) }}"
-                                                                alt="Bukti pembayaran {{ $payment->name }}">
-
-                                                        </a>
+                                                    <td>
+                                                        @if ($payment->payment_proof)
+                                                            <a class="proof-link"
+                                                                href="{{ route('admin.payment.proof', $payment) }}"
+                                                                target="_blank"
+                                                                rel="noopener"
+                                                                aria-label="Buka bukti pembayaran {{ $payment->name }}">
+                                                                <img class="proof-image"
+                                                                    src="{{ route('admin.payment.proof', $payment) }}"
+                                                                    alt="Bukti pembayaran {{ $payment->name }}">
+                                                            </a>
+                                                        @else
+                                                            <span class="muted">Belum diunggah</span>
+                                                        @endif
 
                                                     </td>
 
                                                     <td class="payment-actions">
 
-                                                        @if ($payment->payment_status === 'submitted')
+                                                        @if ($payment->payment_status === 'submitted' && $payment->payment_proof)
 
                                                             <form
                                                                 action="{{ route('admin.payment.verify', $payment) }}"
@@ -1212,10 +1275,22 @@
 
                                                             </form>
 
-                                                        @else
+                                                        @elseif ($payment->payment_status === 'approved')
 
                                                             <span class="muted">
                                                                 Sudah diproses
+                                                            </span>
+
+                                                        @elseif ($payment->payment_status === 'rejected')
+
+                                                            <span class="muted">
+                                                                Menunggu bukti pembayaran baru
+                                                            </span>
+
+                                                        @else
+
+                                                            <span class="muted">
+                                                                Menunggu bukti pembayaran
                                                             </span>
 
                                                         @endif
@@ -1234,12 +1309,12 @@
 
                             @endif
 
-                        </div>
+                        </div> --}}
 
 
-                        {{-- ================= TAGIHAN PENGHUNI ================= --}}
+                        {{-- TAGIHAN PENGHUNI --}}
 
-                        <div class="panel" style="margin-top:16px;">
+                        <div class="panel" id="resident-bills" style="margin-top:16px;">
 
                             <div class="panel-body" style="border-bottom:1px solid var(--line);">
 
@@ -1257,9 +1332,17 @@
 
                                     </div>
 
-                                    <span class="badge neutral">
-                                        {{ $tagihans->count() }} tagihan
-                                    </span>
+                                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+
+                                        <span class="badge neutral">
+                                            {{ $tagihans->count() }} tagihan
+                                        </span>
+
+                                        <a class="button small" href="{{ route('admin.tagihan.create') }}">
+                                            Buat Tagihan
+                                        </a>
+
+                                    </div>
 
                                 </div>
 
@@ -1287,12 +1370,16 @@
                                         <thead>
 
                                             <tr>
+                                                <th>ID</th>
                                                 <th>Penghuni</th>
                                                 <th>Kamar</th>
+                                                <th>Jenis</th>
                                                 <th>Periode</th>
                                                 <th>Nominal</th>
                                                 <th>Jatuh Tempo</th>
-                                                <th>Status</th>
+                                                <th>Status Pembayaran</th>
+                                                <th>Status Penghuni</th>
+                                                <th>Catatan Admin</th>
                                                 <th>Bukti</th>
                                                 <th>Aksi</th>
                                             </tr>
@@ -1305,6 +1392,8 @@
                                             @foreach ($tagihans as $tagihan)
 
                                                 <tr>
+
+                                                    <td>#{{ $tagihan->id }}</td>
 
                                                     {{-- PENGHUNI --}}
                                                     <td>
@@ -1342,9 +1431,15 @@
                                                     </td>
 
 
+                                                    {{-- JENIS PEMBAYARAN --}}
+                                                    <td>
+                                                        {{ $tagihan->jenis_pembayaran ?: '—' }}
+                                                    </td>
+
+
                                                     {{-- PERIODE --}}
                                                     <td>
-                                                        {{ $tagihan->periode }}
+                                                        {{ $tagihan->periode ?: '—' }}
                                                     </td>
 
 
@@ -1385,14 +1480,36 @@
                                                                 Ditolak
                                                             </span>
 
-                                                        @else
+                                                        @elseif ($tagihan->status === 'belum_bayar')
 
                                                             <span class="badge neutral">
                                                                 Belum bayar
                                                             </span>
 
+                                                        @else
+
+                                                            <span class="badge neutral">
+                                                                {{ ucfirst(str_replace('_', ' ', $tagihan->status ?: 'status tidak tersedia')) }}
+                                                            </span>
+
                                                         @endif
 
+                                                    </td>
+
+
+                                                    {{-- STATUS PENGHUNI --}}
+                                                    <td>
+                                                        @if ($tagihan->user?->payment_status === 'approved')
+                                                            <span class="badge approved">Disetujui</span>
+                                                        @else
+                                                            <span class="badge waiting">Menunggu persetujuan</span>
+                                                        @endif
+                                                    </td>
+
+
+                                                    {{-- CATATAN ADMIN --}}
+                                                    <td>
+                                                        {{ $tagihan->catatan ?: '—' }}
                                                     </td>
 
 
@@ -1424,6 +1541,14 @@
 
                                                     {{-- AKSI --}}
                                                     <td>
+
+                                                        <a
+                                                            class="button secondary small"
+                                                            href="{{ route('tagihan.show', $tagihan) }}">
+                                                            Detail
+                                                        </a>
+
+                                                        <br>
 
                                                         @if ($tagihan->status === 'menunggu_verifikasi')
 
@@ -1518,7 +1643,7 @@
                     </section>
 
 
-                    {{-- ==================== DATA KAMAR ADMIN ==================== --}}
+                    {{--  DATA KAMAR ADMIN  --}}
 
                     <section class="section" id="rooms">
 
@@ -1629,7 +1754,7 @@
                     </section>
 
 
-                    {{-- ==================== DATA PENGHUNI ADMIN ==================== --}}
+                    {{--  DATA PENGHUNI ADMIN  --}}
 
                     <section class="section" id="residents">
 
@@ -1700,9 +1825,9 @@
 
                                                     <td>
 
-                                                        <span class="badge {{ $statusClasses[$resident->payment_status] ?? 'neutral' }}">
+                                                        <span class="badge {{ $resident->payment_status === 'approved' ? 'approved' : 'waiting' }}">
 
-                                                            {{ $statusLabels[$resident->payment_status] ?? ucfirst($resident->payment_status) }}
+                                                            {{ $residentStatusLabels[$resident->payment_status] ?? 'Menunggu persetujuan' }}
 
                                                         </span>
 
@@ -1725,30 +1850,16 @@
                     </section>
 
 
-    
+
 
 
                 @else
 
-                    {{-- ========================================================= --}}
-                    {{-- ====================== PENGHUNI ======================== --}}
-                    {{-- ========================================================= --}}
 
-                    @php
-                        $paymentStatus = $currentUser->payment_status;
-
-                        $paymentStatusLabel =
-                            $statusLabels[$paymentStatus] ?? ucfirst($paymentStatus);
-
-                        $paymentStatusClass =
-                            $statusClasses[$paymentStatus] ?? 'neutral';
-                    @endphp
+                    {{-- PENGHUNI --}}
 
 
-                    
-
-
-                    {{-- ==================== PEMBAYARAN PENGHUNI ==================== --}}
+                    {{--  PEMBAYARAN PENGHUNI  --}}
 
                     <section class="section" id="my-payment">
 
@@ -1781,10 +1892,6 @@
                                 </div>
 
                             @else
-
-                                @php
-                                    $tagihanAktif = $tagihans->first();
-                                @endphp
 
                                 <div class="panel-body">
 
@@ -1867,10 +1974,16 @@
                                                             Ditolak
                                                         </span>
 
-                                                    @else
+                                                    @elseif ($tagihanAktif->status === 'belum_bayar')
 
                                                         <span class="badge neutral">
                                                             Belum bayar
+                                                        </span>
+
+                                                    @else
+
+                                                        <span class="badge neutral">
+                                                            {{ ucfirst(str_replace('_', ' ', $tagihanAktif->status ?: 'Status tidak tersedia')) }}
                                                         </span>
 
                                                     @endif
@@ -1878,6 +1991,17 @@
                                                 </dd>
 
                                             </div>
+
+                                            <div class="detail-row">
+                                                {{-- <dt>Status penghuni</dt>
+                                                <dd>
+                                                    @if ($currentUser->payment_status === 'approved')
+                                                        <span class="badge approved">Disetujui</span>
+                                                    @else
+                                                        <span class="badge waiting">Menunggu persetujuan</span>
+                                                    @endif
+                                                </dd>
+                                            </div> --}}
 
                                         </dl>
 
@@ -1935,7 +2059,7 @@
                     </section>
 
 
-                    {{-- ==================== KAMAR YANG DIBOOKING ==================== --}}
+                    {{--  KAMAR YANG DIBOOKING  --}}
                     <section class="section" id="my-room">
                         <div class="section-heading">
                             <div>
@@ -1978,12 +2102,19 @@
                                                 </div>
 
                                                 <div class="detail-row">
-                                                    <span>Status Pembayaran</span>
+                                                    <span>Tanggal booking</span>
+                                                    <strong>{{ $booking->created_at?->format('d M Y, H:i') ?? '—' }}</strong>
+                                                </div>
+
+                                                <div class="detail-row">
+                                                    <span>Status booking</span>
                                                     <strong>
-                                                        @if (Auth::user()->payment_status === 'approved')
-                                                            Lunas
+                                                        @if ($booking->status === 'approved')
+                                                            Disetujui
+                                                        @elseif ($booking->status === 'menunggu_verifikasi')
+                                                            Menunggu verifikasi
                                                         @else
-                                                            Belum Lunas
+                                                            Menunggu konfirmasi
                                                         @endif
                                                     </strong>
                                                 </div>
@@ -1996,7 +2127,7 @@
                         </div>
                     </section>
 
-                    {{-- ==================== RIWAYAT PEMBAYARAN ==================== --}}
+                    {{--  RIWAYAT PEMBAYARAN  --}}
 
                     <section class="section" id="history">
 
@@ -2016,7 +2147,7 @@
 
                         <div class="panel">
 
-                            @if ($currentUser->payment_proof)
+                            @if ($tagihans->isNotEmpty())
 
                                 <div class="table-wrap">
 
@@ -2025,57 +2156,66 @@
                                         <thead>
 
                                             <tr>
-                                                <th>No.</th>
-                                                <th>Jenis / periode</th>
+                                                <th>ID Tagihan</th>
+                                                <th>Jenis Pembayaran</th>
+                                                <th>Periode</th>
+                                                <th>Jatuh Tempo</th>
                                                 <th>Tanggal pembayaran</th>
                                                 <th>Nominal</th>
                                                 <th>Status</th>
                                                 <th>Pembaruan data</th>
+                                                <th>Detail</th>
                                             </tr>
 
                                         </thead>
 
                                         <tbody>
 
-                                            <tr>
+                                            @foreach ($tagihans as $tagihan)
 
-                                                <td>
-                                                    1
-                                                </td>
+                                                <tr>
+                                                    <td>#{{ $tagihan->id }}</td>
+                                                    <td>{{ $tagihan->jenis_pembayaran ?: '—' }}</td>
+                                                    <td>{{ $tagihan->periode ?: '—' }}</td>
+                                                    <td>{{ $tagihan->jatuh_tempo?->format('d M Y') ?? '—' }}</td>
+                                                    <td>{{ $tagihan->tanggal_bayar?->format('d M Y, H:i') ?? '—' }}</td>
+                                                    <td>
+                                                        @if ($tagihan->nominal !== null)
+                                                            Rp {{ number_format($tagihan->nominal, 0, ',', '.') }}
+                                                        @else
+                                                            —
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if ($tagihan->status === 'lunas')
+                                                            <span class="badge approved">Lunas</span>
+                                                        @elseif ($tagihan->status === 'menunggu_verifikasi')
+                                                            <span class="badge waiting">Menunggu verifikasi</span>
+                                                        @elseif ($tagihan->status === 'ditolak')
+                                                            <span class="badge rejected">Ditolak</span>
+                                                        @elseif ($tagihan->status === 'belum_bayar')
+                                                            <span class="badge neutral">Belum bayar</span>
+                                                        @else
+                                                            <span class="badge neutral">
+                                                                {{ ucfirst(str_replace('_', ' ', $tagihan->status ?: 'Status tidak tersedia')) }}
+                                                            </span>
+                                                        @endif
 
-                                                <td>
+                                                        @if ($tagihan->status === 'ditolak' && $tagihan->catatan)
+                                                            <br>
+                                                            <span class="muted">{{ $tagihan->catatan }}</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>{{ $tagihan->updated_at?->format('d M Y, H:i') ?? '—' }}</td>
+                                                    <td>
+                                                        <a class="button secondary small"
+                                                            href="{{ route('tagihan.show', $tagihan) }}">
+                                                            Detail
+                                                        </a>
+                                                    </td>
+                                                </tr>
 
-                                                    Tidak dicatat
-
-                                                    <br>
-
-                                                    <span class="muted">
-                                                        Periode tidak tersedia
-                                                    </span>
-
-                                                </td>
-
-                                                <td>
-                                                    Tidak dicatat
-                                                </td>
-
-                                                <td>
-                                                    Tidak tersedia
-                                                </td>
-
-                                                <td>
-
-                                                    <span class="badge {{ $paymentStatusClass }}">
-                                                        {{ $paymentStatusLabel }}
-                                                    </span>
-
-                                                </td>
-
-                                                <td>
-                                                    {{ $currentUser->updated_at?->format('d M Y, H:i') ?? '—' }}
-                                                </td>
-
-                                            </tr>
+                                            @endforeach
 
                                         </tbody>
 
@@ -2085,33 +2225,15 @@
 
                                 <p class="notice" style="margin: 14px;">
 
-                                    Skema saat ini hanya menyimpan satu status dan bukti terkini
-                                    pada akun pengguna, bukan histori transaksi.
-
-                                </p>
-
                             @else
 
                                 <div class="empty-state">
 
                                     <strong>
-                                        Belum ada pembayaran untuk ditampilkan.
+                                        Belum ada tagihan untuk ditampilkan.
                                     </strong>
 
-                                    Setelah Anda mengirim bukti, status pembayaran akan tampil di sini.
-
-                                    @if ($currentUser->payment_status !== 'approved')
-
-                                        <br>
-
-                                        <a class="button"
-                                            href="{{ route('payment.show') }}">
-
-                                            Unggah bukti pembayaran
-
-                                        </a>
-
-                                    @endif
+                                    Riwayat pembayaran sewa akan muncul setelah admin membuat tagihan.
 
                                 </div>
 
@@ -2120,61 +2242,72 @@
                         </div>
 
                     </section>
+                @endif
 
+                <section class="section" id="profile">
+                    <div class="section-heading">
+                        <div>
+                            <h2>Profil Saya</h2>
+                            <p>Informasi akun yang sedang digunakan.</p>
+                        </div>
+                    </div>
 
-                    {{-- ==================== PROFIL ==================== --}}
-
-                    <section class="section" id="profile">
-
-                        <div class="section-heading">
+                    <div class="panel panel-body">
+                        <div class="profile-card">
+                            @if ($currentUser->profile_photo_path)
+                                <img class="profile-photo"
+                                    src="{{ Storage::disk('public')->url($currentUser->profile_photo_path) }}"
+                                    alt="Foto profil {{ $currentUser->name }}">
+                            @else
+                                <div class="avatar" aria-hidden="true">
+                                    {{ mb_strtoupper(mb_substr($currentUser->name, 0, 1)) }}
+                                </div>
+                            @endif
 
                             <div>
-
-                                <h2>Profil Saya</h2>
-
-                                <p>
-                                    Informasi akun yang sedang digunakan.
-                                </p>
-
+                                <strong>{{ $currentUser->name }}</strong>
+                                <span>{{ $currentUser->email }}</span>
                             </div>
-
                         </div>
 
-                        <div class="panel panel-body">
+                        <form class="profile-form" action="{{ route('profile.update') }}" method="POST"
+                            enctype="multipart/form-data">
+                            @csrf
+                            @method('PUT')
 
-                            <div class="profile-card">
-
-                                <div class="avatar" aria-hidden="true">
-
-                                    {{ mb_strtoupper(mb_substr($currentUser->name, 0, 1)) }}
-
-                                </div>
-
-                                <div>
-
-                                    <strong>
-                                        {{ $currentUser->name }}
-                                    </strong>
-
-                                    <span>
-                                        {{ $currentUser->email }}
-                                    </span>
-
-                                </div>
-
+                            <div class="profile-field">
+                                <label for="profile-name">Nama</label>
+                                <input id="profile-name" type="text" name="name"
+                                    value="{{ old('name', $currentUser->name) }}" maxlength="255" required>
                             </div>
 
-                            <p class="notice">
+                            <div class="profile-field">
+                                <label for="profile-email">Email</label>
+                                <input id="profile-email" type="email" name="email"
+                                    value="{{ old('email', $currentUser->email) }}" maxlength="255" required>
+                            </div>
 
-                                Fitur ubah profil belum tersedia pada proyek saat ini.
+                            <div class="profile-field">
+                                <label for="profile-photo">Foto profil (JPG, PNG, atau WEBP; maksimal 5 MB)</label>
+                                <input id="profile-photo" type="file" name="foto_profil"
+                                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+                            </div>
 
-                            </p>
+                            <div class="profile-actions">
+                                <button class="button" type="submit">Simpan perubahan</button>
+                            </div>
+                        </form>
 
-                        </div>
-
-                    </section>
-
-                @endif
+                        @if ($currentUser->profile_photo_path)
+                            <form action="{{ route('profile.photo.destroy') }}" method="POST"
+                                onsubmit="return confirm('Hapus foto profil?')">
+                                @csrf
+                                @method('DELETE')
+                                <button class="button danger small" type="submit">Hapus foto profil</button>
+                            </form>
+                        @endif
+                    </div>
+                </section>
 
             </div>
 

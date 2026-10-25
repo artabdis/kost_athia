@@ -59,7 +59,7 @@ class RoomManagementTest extends TestCase
 
     public function test_room_management_is_restricted_to_admins(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'user']);
 
         $this->actingAs($user)
             ->get(route('admin.rooms.index'))
@@ -174,8 +174,8 @@ class RoomManagementTest extends TestCase
     {
         $vip = Room::query()->where('kode_kamar', 'VIP')->firstOrFail();
         Room::create([
-            'kode_kamar' => 'A01',
-            'nama' => 'Kamar A01 Reguler',
+            'kode_kamar' => 'A03',
+            'nama' => 'Kamar A03 Reguler',
             'lokasi' => 'Lantai 1',
             'harga' => 750000,
             'status' => 'tersedia',
@@ -186,12 +186,18 @@ class RoomManagementTest extends TestCase
             ->assertSee('Rp1.500.000')
             ->assertSee('Lantai Utama (Akses Eksklusif)');
 
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'user']);
 
         $this->actingAs($user)
-            ->get(route('kamar.vip.booking'))
+            ->post(route('kamar.vip.booking'))
             ->assertRedirect(route('payment.show'))
-            ->assertSessionHas('booking_room_id', $vip->id);
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('bookings', [
+            'user_id' => $user->id,
+            'room_id' => $vip->id,
+            'status' => 'pending',
+        ]);
     }
 
     public function test_admin_can_view_paginated_room_list(): void

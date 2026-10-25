@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Booking;
 use App\Models\Room;
+use App\Models\Tagihan;
 use App\Models\User;
+use App\Services\RoomBookingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
-use App\Models\Tagihan;
 
 class AuthController extends Controller
 {
@@ -33,9 +34,20 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        $user = Auth::user();
+        $user = Auth::user()->refresh();
+        $bookingRoomId = $request->session()->pull('booking_room_id');
 
-        if ($user->role === 'admin' || $user->payment_status === 'approved') {
+        if ($user->role === 'user' && $bookingRoomId) {
+            try {
+                app(RoomBookingService::class)->reserve($user, (int) $bookingRoomId);
+            } catch (ValidationException $exception) {
+                return redirect()
+                    ->route('kamar')
+                    ->with('error', $exception->errors()['booking'][0] ?? 'Kamar sudah tidak tersedia.');
+            }
+        }
+
+        if ($user->role === 'admin' || $user->isApprovedResident()) {
             return redirect()
                 ->route('dashboard')
                 ->with('success', 'Login berhasil.');
@@ -70,19 +82,11 @@ class AuthController extends Controller
             'email.email' => 'Isi data dengan valid.',
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Ambil kamar yang dipilih sebelum session diregenerasi
-        |--------------------------------------------------------------------------
-        */
+        /* Ambil kamar yang dipilih sebelum session diregenerasi*/
         $bookingRoomId = $request->session()->get('booking_room_id');
 
-        /*
-        |--------------------------------------------------------------------------
-        | Buat akun
-        |--------------------------------------------------------------------------
-        */
-        $user = DB::transaction(function () use ($validated): User {
+        /* Buat akun*/
+        $user = DB::transaction(function () use ($validated, $bookingRoomId): User {
             $role = User::query()->doesntExist() ? 'admin' : 'user';
 
             $user = User::create([
@@ -95,56 +99,33 @@ class AuthController extends Controller
                 'role' => $role,
             ])->save();
 
+            if ($role === 'user' && $bookingRoomId) {
+                app(RoomBookingService::class)->reserve($user, (int) $bookingRoomId);
+            }
+
             return $user;
         });
 
-        /*
-        |--------------------------------------------------------------------------
-        | Simpan kamar yang dipilih ke booking user
-        |--------------------------------------------------------------------------
-        */
-        if ($user->role === 'user' && $bookingRoomId) {
+        $request->session()->forget('booking_room_id');
 
-            $room = Room::query()->find($bookingRoomId);
-
-            if ($room && $room->status === 'tersedia') {
-
-                Booking::query()->firstOrCreate(
-                    [
-                        'user_id' => $user->id,
-                        'room_id' => $room->id,
-                    ],
-                    [
-                        'status' => 'pending',
-                    ]
-                );
-
-                /*
-                | Setelah booking berhasil disimpan,
-                | hapus pilihan kamar dari session.
-                */
-                $request->session()->forget('booking_room_id');
-            }
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Login otomatis setelah registrasi
-        |--------------------------------------------------------------------------
-        */
+        /* Login otomatis setelah registrasi*/
         Auth::login($user);
 
         $request->session()->regenerate();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Redirect sesuai role
-        |--------------------------------------------------------------------------
-        */
+        /*Redirect sesuai role*/
         if ($user->role === 'admin') {
             return redirect()
                 ->route('dashboard')
                 ->with('success', 'Registrasi berhasil.');
+        }
+
+        if ($bookingRoomId) {
+            $tagihan = $user->tagihans()->latest()->firstOrFail();
+
+            return redirect()
+                ->route('tagihan.show', $tagihan)
+                ->with('success', 'Registrasi berhasil. Silakan unggah bukti pembayaran tagihan kamar.');
         }
 
         return redirect()
@@ -157,18 +138,14 @@ class AuthController extends Controller
 
     public function dashboard(): View|RedirectResponse
     {
-        $user = Auth::user();
+        $user = Auth::user()->refresh();
 
-        /*
-        |--------------------------------------------------------------------------
-        | DASHBOARD ADMIN
-        |--------------------------------------------------------------------------
-        */
+        /*DASHBOARD ADMIN*/
         if ($user->role === 'admin') {
             return view('dashboard', [
                 'payments' => User::query()
                     ->where('role', 'user')
-                    ->whereNotNull('payment_proof')
+                    ->whereDoesntHave('tagihans')
                     ->latest('updated_at')
                     ->take(10)
                     ->get(),
@@ -183,19 +160,9 @@ class AuthController extends Controller
                     ->orderBy('kode_kamar')
                     ->get(),
 
-                'bookings' => Booking::query()
-                    ->with([
-                        'user:id,name,email',
-                        'room:id,kode_kamar,nama,harga,status',
-                    ])
-                    ->latest()
-                    ->take(10)
-                    ->get(),
-
                 'tagihans' => Tagihan::query()
                     ->with(['user', 'room'])
                     ->latest()
-                    ->take(10)
                     ->get(),
 
                 'stats' => [
@@ -210,27 +177,18 @@ class AuthController extends Controller
                         ->where('payment_status', 'approved')
                         ->count(),
 
-                    'pendingPayments' => User::query()
-                        ->where('role', 'user')
-                        ->where('payment_status', 'submitted')
+                    'pendingPayments' => Tagihan::query()
+                        ->where('status', 'menunggu_verifikasi')
                         ->count(),
                 ],
             ]);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | DASHBOARD PENGHUNI
-        |--------------------------------------------------------------------------
-        */
+        /*DASHBOARD PENGHUNI*/
         abort_unless($user->role === 'user', 403);
 
-        /*
-        |--------------------------------------------------------------------------
-        | PEMBAYARAN AWAL TETAP SEPERTI SEBELUMNYA
-        |--------------------------------------------------------------------------
-        */
-        if ($user->payment_status !== 'approved') {
+        /* PEMBAYARAN AWAL TETAP SEPERTI SEBELUMNYA*/
+        if (! $user->isApprovedResident()) {
             return redirect()
                 ->route('payment.show')
                 ->with(
@@ -239,23 +197,24 @@ class AuthController extends Controller
                 );
         }
 
+        $tagihans = Tagihan::query()
+            ->with('room')
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get();
+
         return view('dashboard', [
-            /*
-            | Booking hanya milik user yang sedang login.
-            */
+            /*Booking hanya milik user yang sedang login.*/
             'bookings' => $user->bookings()
                 ->with('room')
                 ->latest()
                 ->get(),
 
-            /*
-            | Tagihan hanya milik user yang sedang login.
-            */
-            'tagihans' => Tagihan::query()
-                ->with('room')
-                ->where('user_id', $user->id)
-                ->latest()
-                ->get(),
+            /* Tagihan hanya milik user yang sedang login.*/
+            'tagihans' => $tagihans,
+            'tagihanAktif' => $tagihans->first(
+                fn (Tagihan $tagihan): bool => $tagihan->status !== 'lunas'
+            ) ?? $tagihans->first(),
         ]);
     }
 
@@ -268,4 +227,4 @@ class AuthController extends Controller
 
         return redirect()->route('login');
     }
-}    
+}

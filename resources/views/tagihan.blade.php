@@ -234,11 +234,13 @@
         <div class="title">
 
             <h1>
-                Pembayaran Tagihan
+                {{ Auth::user()->role === 'admin' ? 'Detail Tagihan' : 'Pembayaran Tagihan' }}
             </h1>
 
             <p>
-                Periksa detail tagihan Anda sebelum mengunggah bukti pembayaran.
+                {{ Auth::user()->role === 'admin'
+                    ? 'Periksa informasi tagihan dan status pembayaran penghuni.'
+                    : 'Periksa detail tagihan Anda sebelum mengunggah bukti pembayaran.' }}
             </p>
 
         </div>
@@ -281,9 +283,7 @@
         <div class="grid">
 
 
-            {{-- =====================================================
-                DETAIL TAGIHAN
-            ====================================================== --}}
+            {{--DETAIL TAGIHAN--}}
 
             <div class="card">
 
@@ -291,6 +291,35 @@
                     Detail Tagihan
                 </h2>
 
+                <div class="detail">
+
+                    <span class="label">
+                        Nomor Tagihan
+                    </span>
+
+                    <span class="value">
+                        #{{ $tagihan->id }}
+                    </span>
+
+                </div>
+
+
+                @if (Auth::user()->role === 'admin')
+
+                    <div class="detail">
+
+                        <span class="label">
+                            Penghuni
+                        </span>
+
+                        <span class="value">
+                            {{ $tagihan->user?->name ?? 'Pengguna tidak tersedia' }}
+                            ({{ $tagihan->user?->email ?? '—' }})
+                        </span>
+
+                    </div>
+
+                @endif
 
                 <div class="detail">
 
@@ -299,7 +328,7 @@
                     </span>
 
                     <span class="value">
-                        {{ $tagihan->jenis_pembayaran }}
+                        {{ $tagihan->jenis_pembayaran ?: '—' }}
                     </span>
 
                 </div>
@@ -308,11 +337,27 @@
                 <div class="detail">
 
                     <span class="label">
-                        Kamar
+                        Nomor Kamar
                     </span>
 
                     <span class="value">
-                        {{ $tagihan->room->kode_kamar ?? '-' }}
+                        {{ $tagihan->room?->kode_kamar ?? '-' }}
+                    </span>
+
+                </div>
+
+                <div class="detail">
+
+                    <span class="label">
+                        Status Penghuni
+                    </span>
+
+                    <span class="value">
+                        @if ($statusPenghuni === 'approved')
+                            Disetujui
+                        @else
+                            Menunggu persetujuan
+                        @endif
                     </span>
 
                 </div>
@@ -325,7 +370,7 @@
                     </span>
 
                     <span class="value">
-                        {{ $tagihan->periode }}
+                        {{ $tagihan->periode ?: '—' }}
                     </span>
 
                 </div>
@@ -351,7 +396,11 @@
                     </div>
 
                     <div class="nominal">
-                        Rp {{ number_format($tagihan->nominal, 0, ',', '.') }}
+                        @if ($tagihan->nominal !== null)
+                            Rp {{ number_format($tagihan->nominal, 0, ',', '.') }}
+                        @else
+                            —
+                        @endif
                     </div>
 
 
@@ -377,11 +426,29 @@
                             Menunggu Verifikasi
                         </span>
 
-                    @else
+                    @elseif ($tagihan->status === 'belum_bayar')
 
                         <span class="status">
                             Belum Bayar
                         </span>
+
+                    @else
+
+                        <span class="status">
+                            {{ ucwords(str_replace('_', ' ', $tagihan->status ?: 'Status tidak tersedia')) }}
+                        </span>
+
+                    @endif
+
+
+                    @if (Auth::user()->role === 'admin' && $tagihan->bukti_pembayaran)
+
+                        <a class="button"
+                            href="{{ route('admin.tagihan.proof', $tagihan) }}"
+                            target="_blank"
+                            rel="noopener">
+                            Lihat Bukti Pembayaran
+                        </a>
 
                     @endif
 
@@ -407,9 +474,47 @@
             </div>
 
 
-            {{-- =====================================================
+            {{--
                 UPLOAD BUKTI
-            ====================================================== --}}
+        = --}}
+
+            @if (Auth::user()->role === 'admin')
+
+                <div class="card">
+
+                    <h2>Verifikasi Tagihan</h2>
+
+                    @if ($tagihan->status === 'menunggu_verifikasi' && $tagihan->bukti_pembayaran)
+
+                        <p>Bukti pembayaran menunggu pemeriksaan admin.</p>
+
+                        <form action="{{ route('admin.tagihan.verify', $tagihan) }}" method="POST">
+                            @csrf
+
+                            <label for="catatan">Catatan (wajib jika pembayaran ditolak)</label>
+                            <textarea id="catatan" name="catatan" maxlength="1000">{{ old('catatan') }}</textarea>
+
+                            <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+                                <button class="button" type="submit" name="status" value="lunas">
+                                    Setujui Pembayaran
+                                </button>
+                                <button class="button" type="submit" name="status" value="ditolak">
+                                    Tolak Pembayaran
+                                </button>
+                            </div>
+                        </form>
+
+                    @else
+
+                        <p>Status tagihan saat ini: {{ ucwords(str_replace('_', ' ', $tagihan->status ?: 'tidak tersedia')) }}.</p>
+
+                    @endif
+
+                    <a class="button" href="{{ route('dashboard') }}">Kembali ke Dashboard</a>
+
+                </div>
+
+            @else
 
             <div class="card">
 
@@ -463,9 +568,7 @@
                             type="submit"
                             class="button">
 
-                            {{ $tagihan->status === 'ditolak'
-                                ? 'Upload Bukti Baru'
-                                : 'Kirim Bukti Pembayaran' }}
+                            Upload Bukti Baru
 
                         </button>
 
@@ -515,6 +618,8 @@
                 @endif
 
             </div>
+
+            @endif
 
         </div>
 
